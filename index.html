@@ -3,78 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leonardo N. Hernandez | Portafolio</title>
+    <title>Leonardo N. Hernandez | Portfolio & Blog</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg-color: #0d1117;
-            --text-color: #c9d1d9;
-            --accent-color: #58a6ff;
-            --card-bg: #161b22;
+            --bg-color: #07090f;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-glow: rgba(0, 229, 255, 0.5);
+            --accent-color: #00e5ff;
+            --accent-secondary: #b026ff;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --card-hover-bg: rgba(255, 255, 255, 0.06);
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(176, 38, 255, 0.05), transparent 25%);
+            background-attachment: fixed;
+            color: var(--text-main);
             line-height: 1.6;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
+
+        /* Navbar (Glassmorphism) */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(7, 9, 15, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #ffffff;
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-secondary));
+            border-radius: 2px;
+        }
+
         header {
             text-align: center;
-            padding: 4rem 2rem;
-            border-bottom: 1px solid #30363d;
+            padding: 8rem 2rem 4rem;
+            max-width: 800px;
+            margin: 0 auto;
         }
+
         h1 {
-            color: #ffffff;
+            font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #ffffff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+
         h2 {
-            color: var(--accent-color);
+            font-size: 1.2rem;
             font-weight: 400;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 0 2rem 4rem;
+            min-height: 60vh;
         }
-        .section {
-            margin-bottom: 3rem;
+
+        /* Sections Toggle */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
         }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        /* Glassmorphism Cards */
         .card {
-            background-color: var(--card-bg);
-            border: 1px solid #30363d;
-            border-radius: 6px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
             padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            background: var(--card-hover-bg);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .card h4 {
+            margin-top: 0;
+            color: #ffffff;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--text-muted);
             margin-bottom: 1rem;
         }
+
         a {
             color: var(--accent-color);
             text-decoration: none;
+            transition: color 0.3s ease;
         }
+
         a:hover {
-            text-decoration: underline;
+            color: #ffffff;
+            text-shadow: 0 0 8px var(--accent-glow);
         }
+
         .skills-tag {
             display: inline-block;
-            background-color: rgba(88, 166, 255, 0.1);
+            background: rgba(0, 229, 255, 0.1);
             color: var(--accent-color);
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            border-radius: 30px;
             font-size: 0.85rem;
+            font-weight: 500;
             margin-right: 0.5rem;
             margin-bottom: 0.5rem;
-            border: 1px solid rgba(88, 166, 255, 0.4);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            transition: all 0.3s ease;
         }
+
+        .skills-tag:hover {
+            background: rgba(0, 229, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Blog specific styles */
+        .blog-post-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .blog-post-meta span {
+            color: var(--accent-secondary);
+        }
+        
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .read-more::after {
+            content: '→';
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover .read-more::after {
+            transform: translateX(5px);
+        }
+
         footer {
             text-align: center;
             padding: 2rem;
             font-size: 0.9rem;
-            border-top: 1px solid #30363d;
+            color: var(--text-muted);
+            border-top: 1px solid var(--glass-border);
             margin-top: 2rem;
         }
     </style>
 </head>
 <body>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a class="nav-link active" onclick="showSection('cv')">CV / Portafolio</a></li>
+            <li><a class="nav-link" onclick="showSection('blog')">Blog</a></li>
+        </ul>
+    </nav>
 
     <header>
         <h1>Leonardo Nicolas Hernandez</h1>
@@ -82,48 +258,110 @@
     </header>
 
     <div class="container">
-        <section class="section">
-            <h3 style="color: #fff;">Sobre mí</h3>
-            <p>Soy estudiante de Ingeniería Eléctrica Electrónica en la UNAM, con formación técnica en Sistemas Digitales por el IPN. Me apasiona el diseño de hardware, la verificación de circuitos y la investigación interdisciplinaria. Cuando no estoy depurando electrónica, probablemente estoy inmerso en la ciencia ficción, disfrutando de la naturaleza o explorando el universo en No Man's Sky.</p>
-        </section>
+        <!-- SECCIÓN CV -->
+        <div id="cv-section" class="content-section active">
+            <section style="margin-bottom: 3rem;">
+                <h3 class="section-title">Sobre mí</h3>
+                <p>Soy estudiante de Ingeniería Eléctrica Electrónica en la UNAM, con formación técnica en Sistemas Digitales por el IPN. Me apasiona el diseño de hardware, la verificación de circuitos y la investigación interdisciplinaria. Cuando no estoy depurando electrónica, probablemente estoy inmerso en la ciencia ficción, disfrutando de la naturaleza o explorando el universo en No Man's Sky.</p>
+            </section>
 
-        <section class="section">
-            <h3 style="color: #fff;">Experiencia Profesional</h3>
-            <div class="card">
-                <h4 style="margin-top: 0; color: #fff;">Design Intern</h4>
-                <p><em>Chamberlain Group</em></p>
-                <p>Enfocado en la verificación de diseño, pruebas de componentes y depuración de hardware para soluciones electrónicas.</p>
-            </div>
-        </section>
+            <section style="margin-bottom: 3rem;">
+                <h3 class="section-title">Experiencia Profesional</h3>
+                <div class="card">
+                    <h4>Design Intern</h4>
+                    <p style="margin-top: -5px; font-size: 0.9rem;"><em>Chamberlain Group</em></p>
+                    <p style="margin-bottom: 0;">Enfocado en la verificación de diseño, pruebas de componentes y depuración de hardware para soluciones electrónicas.</p>
+                </div>
+            </section>
 
-        <section class="section">
-            <h3 style="color: #fff;">Investigación y Publicaciones</h3>
-            <div class="card">
-                <h4 style="margin-top: 0; color: #fff;">76th International Astronautical Congress (IAC) - Sídney</h4>
-                <p><strong>Paper:</strong> <em>"Microfluidic technologies for the search for life on icy moons"</em></p>
-                <p>Autor principal. Investigación enfocada en la intersección de BioMEMS, fabricación de nanofibras y exploración espacial.</p>
-            </div>
-        </section>
+            <section style="margin-bottom: 3rem;">
+                <h3 class="section-title">Investigación y Publicaciones</h3>
+                <div class="card">
+                    <h4>76th International Astronautical Congress (IAC) - Sídney</h4>
+                    <p style="margin-bottom: 0.5rem;"><strong>Paper:</strong> <em>"Microfluidic technologies for the search for life on icy moons"</em></p>
+                    <p style="margin-bottom: 0;">Autor principal. Investigación enfocada en la intersección de BioMEMS, fabricación de nanofibras y exploración espacial.</p>
+                </div>
+            </section>
 
-        <section class="section">
-            <h3 style="color: #fff;">Áreas de Interés</h3>
-            <div>
-                <span class="skills-tag">Verificación de Diseño</span>
-                <span class="skills-tag">BioMEMS & Microfluídica</span>
-                <span class="skills-tag">Depuración de Hardware</span>
-                <span class="skills-tag">Sistemas Digitales</span>
-            </div>
-        </section>
+            <section style="margin-bottom: 3rem;">
+                <h3 class="section-title">Áreas de Interés</h3>
+                <div style="margin-top: 1rem;">
+                    <span class="skills-tag">Verificación de Diseño</span>
+                    <span class="skills-tag">BioMEMS & Microfluídica</span>
+                    <span class="skills-tag">Depuración de Hardware</span>
+                    <span class="skills-tag">Sistemas Digitales</span>
+                    <span class="skills-tag">Diseño de PCBs</span>
+                </div>
+            </section>
 
-        <section class="section">
-            <h3 style="color: #fff;">Contacto</h3>
-            <p>Puedes ver más de mis repositorios aquí en <a href="https://github.com/rehnoel">GitHub</a> o contactarme para colaboraciones y proyectos.</p>
-        </section>
+            <section>
+                <h3 class="section-title">Contacto</h3>
+                <p>Puedes ver más de mis repositorios y proyectos aquí en mi <a href="https://github.com/rehnoel" target="_blank" rel="noopener noreferrer">GitHub</a>. Siempre abierto a charlar sobre electrónica espacial o diseño de hardware.</p>
+            </section>
+        </div>
+
+        <!-- SECCIÓN BLOG -->
+        <div id="blog-section" class="content-section">
+            <section>
+                <h3 class="section-title">Últimos Artículos</h3>
+                
+                <!-- Artículo 1 -->
+                <article class="card">
+                    <h4><a href="#" style="color: #ffffff;">Integridad de Señal en PCBs de Alta Velocidad</a></h4>
+                    <div class="blog-post-meta">
+                        <span>Hardware Design</span> • 15 de Mayo, 2026
+                    </div>
+                    <p>Cuando trabajamos con frecuencias de reloj elevadas, las pistas de cobre dejan de ser simples cables y se comportan como líneas de transmisión. En este artículo exploro técnicas básicas de enrutamiento diferencial y adaptación de impedancias...</p>
+                    <a href="#" class="read-more">Leer artículo</a>
+                </article>
+
+                <!-- Artículo 2 -->
+                <article class="card">
+                    <h4><a href="#" style="color: #ffffff;">BioMEMS: El futuro de la exploración espacial</a></h4>
+                    <div class="blog-post-meta">
+                        <span>Investigación</span> • 3 de Abril, 2026
+                    </div>
+                    <p>Los Sistemas Microelectromecánicos Biológicos (BioMEMS) ofrecen una oportunidad única para la miniaturización de laboratorios (Lab-on-a-chip). Analizo cómo pueden usarse para detectar biomarcadores en lunas heladas como Encélado...</p>
+                    <a href="#" class="read-more">Leer artículo</a>
+                </article>
+
+                <!-- Artículo 3 -->
+                <article class="card">
+                    <h4><a href="#" style="color: #ffffff;">Depuración de FPGAs: Más allá del osciloscopio</a></h4>
+                    <div class="blog-post-meta">
+                        <span>Sistemas Digitales</span> • 12 de Febrero, 2026
+                    </div>
+                    <p>Configurar analizadores lógicos embebidos (como ILA de Xilinx o SignalTap de Intel) es fundamental para encontrar bugs escurridizos en sistemas digitales. Una guía paso a paso basada en mis dolores de cabeza recientes...</p>
+                    <a href="#" class="read-more">Leer artículo</a>
+                </article>
+
+            </section>
+        </div>
     </div>
 
     <footer>
-        <p>&copy; 2026 Leonardo Nicolas Hernandez. Construido y alojado en GitHub Pages.</p>
+        <p>&copy; 2026 Leonardo Nicolas Hernandez. Construido con ❤️, HTML y CSS puro.</p>
     </footer>
 
+    <script>
+        function showSection(sectionId) {
+            // Actualizar enlaces activos en Navbar
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Ocultar todas las secciones
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId + '-section').classList.add('active');
+            
+            // Scroll arriba (suave)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
