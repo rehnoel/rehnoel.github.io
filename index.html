@@ -1,170 +1,41 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leonardo N. Hernandez | Portfolio & Blog</title>
+    <title>Leonardo N. Hernandez | Inicio</title>
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-
 </head>
-
 <body>
-
-    <!-- ==========================================================================
-         COPIA DESDE AQUÍ HACIA ABAJO EN TU ARCHIVO: index.html
-         (Asumiendo que ya tienes las etiquetas head y body configuradas)
-         ========================================================================== -->
-
     <nav>
         <ul class="nav-links">
-            <li><a class="nav-link active" onclick="showSection('cv')">CV / Portafolio</a></li>
-            <li><a class="nav-link" onclick="showSection('blog')">Blog</a></li>
+            <li><a href="index.html" class="nav-link active">Inicio</a></li>
+            <li><a href="cv.html" class="nav-link">CV / Portafolio</a></li>
+            <li><a href="blog.html" class="nav-link">Blog</a></li>
         </ul>
     </nav>
 
-    <header>
+    <header class="home-header">
+        <div class="profile-photo-container">
+            <!-- Reemplaza "profile.jpg" con la ruta a tu foto real -->
+            <img src="profile.jpg" alt="Leonardo Nicolas Hernandez" class="profile-photo" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23555555\' stroke-width=\'1\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\'/%3E%3Ccircle cx=\'12\' cy=\'7\' r=\'4\'/%3E%3C/svg%3E'">
+        </div>
         <h1>Leonardo Nicolas Hernandez</h1>
         <h2>Ingeniero Eléctrico Electrónico | Hardware & BioMEMS</h2>
+        
+        <div class="home-actions">
+            <a href="cv.html" class="action-btn">Ir al CV</a>
+            <a href="blog.html" class="action-btn">Ir al Blog</a>
+        </div>
     </header>
-
-    <div class="container">
-        <!-- SECCIÓN CV -->
-        <div id="cv-section" class="content-section active">
-            <section style="margin-bottom: 3rem;">
-                <h3 class="section-title">Sobre mí</h3>
-                <p>Soy estudiante de Ingeniería Eléctrica Electrónica en la UNAM, con formación técnica en Sistemas
-                    Digitales por el IPN. Me apasiona el diseño de hardware, la verificación de circuitos y la
-                    investigación interdisciplinaria. Cuando no estoy depurando electrónica, probablemente estoy inmerso
-                    en la ciencia ficción, disfrutando de la naturaleza o explorando el universo en No Man's Sky.</p>
-            </section>
-
-            <section style="margin-bottom: 3rem;">
-                <h3 class="section-title">Experiencia Profesional</h3>
-                <div class="card">
-                    <h4>Design Intern</h4>
-                    <p style="margin-top: -5px; font-size: 0.9rem;"><em>Chamberlain Group</em></p>
-                    <p style="margin-bottom: 0;">Enfocado en la verificación de diseño, pruebas de componentes y
-                        depuración de hardware para soluciones electrónicas.</p>
-                </div>
-            </section>
-
-            <section style="margin-bottom: 3rem;">
-                <h3 class="section-title">Investigación y Publicaciones</h3>
-                <div class="card">
-                    <h4>76th International Astronautical Congress (IAC) - Sídney</h4>
-                    <p style="margin-bottom: 0.5rem;"><strong>Paper:</strong> <em><a
-                                href="https://www.proceedings.com/083074-0059.html" target="_blank"
-                                rel="noopener noreferrer">"Microfluidic technologies for the search for life on icy
-                                moons"</a></em></p>
-                    <p style="margin-bottom: 0;">Autor principal. Investigación enfocada en la intersección de BioMEMS,
-                        fabricación de nanofibras y exploración espacial.</p>
-                </div>
-            </section>
-
-            <section style="margin-bottom: 3rem;">
-                <h3 class="section-title">Áreas de Interés</h3>
-                <div style="margin-top: 1rem;">
-                    <span class="skills-tag">Verificación de Diseño</span>
-                    <span class="skills-tag">BioMEMS & Microfluídica</span>
-                    <span class="skills-tag">Depuración de Hardware</span>
-                    <span class="skills-tag">Sistemas Digitales</span>
-                    <span class="skills-tag">Diseño de PCBs</span>
-                </div>
-            </section>
-
-            <section>
-                <h3 class="section-title">Contacto</h3>
-                <p>Puedes ver más de mis repositorios y proyectos aquí en mi <a href="https://github.com/rehnoel"
-                        target="_blank" rel="noopener noreferrer">GitHub</a>. Siempre abierto a charlar sobre
-                    electrónica espacial o diseño de hardware.</p>
-            </section>
-        </div>
-
-        <!-- SECCIÓN BLOG -->
-        <div id="blog-section" class="content-section">
-            <section>
-                <h3 class="section-title">Últimos Artículos</h3>
-
-                <!-- Artículo 1 -->
-                <article class="card">
-                    <h4><a href="#">Integridad de Señal en PCBs de Alta Velocidad</a></h4>
-                    <div class="blog-post-meta">
-                        <span>Hardware Design</span> &bull; 15 de Mayo, 2026
-                    </div>
-                    <p>Cuando trabajamos con frecuencias de reloj elevadas, las pistas de cobre dejan de ser simples
-                        cables y se comportan como líneas de transmisión. En este artículo exploro técnicas básicas de
-                        enrutamiento diferencial y adaptación de impedancias...</p>
-                    <a href="#" class="read-more">Leer artículo</a>
-                </article>
-
-                <!-- Artículo 2 -->
-                <article class="card">
-                    <h4><a href="#">BioMEMS: El futuro de la exploración espacial</a></h4>
-                    <div class="blog-post-meta">
-                        <span>Investigación</span> &bull; 3 de Abril, 2026
-                    </div>
-                    <p>Los Sistemas Microelectromecánicos Biológicos (BioMEMS) ofrecen una oportunidad única para la
-                        miniaturización de laboratorios (Lab-on-a-chip). Analizo cómo pueden usarse para detectar
-                        biomarcadores en lunas heladas como Encélado...</p>
-                    <a href="#" class="read-more">Leer artículo</a>
-                </article>
-
-                <!-- Artículo 3 -->
-                <article class="card">
-                    <h4><a href="#">Depuración de FPGAs: Más allá del osciloscopio</a></h4>
-                    <div class="blog-post-meta">
-                        <span>Sistemas Digitales</span> &bull; 12 de Febrero, 2026
-                    </div>
-                    <p>Configurar analizadores lógicos embebidos (como ILA de Xilinx o SignalTap de Intel) es
-                        fundamental para encontrar bugs escurridizos en sistemas digitales. Una guía paso a paso basada
-                        en mis dolores de cabeza recientes...</p>
-                    <a href="#" class="read-more">Leer artículo</a>
-                </article>
-
-            </section>
-        </div>
-    </div>
 
     <footer>
         <p>&copy; 2026 Leonardo Nicolas Hernandez. Construido con ❤️, HTML y CSS puro.</p>
     </footer>
-
-    <script>
-        function showSection(sectionId) {
-            // Prevenir el comportamiento por defecto si se pasara un evento
-            if (window.event) {
-                window.event.preventDefault();
-            }
-
-            // Actualizar enlaces activos en Navbar
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-
-            // Buscar el enlace correcto basado en el onclick y activarlo
-            const activeLink = Array.from(document.querySelectorAll('.nav-link')).find(
-                link => link.getAttribute('onclick').includes(sectionId)
-            );
-            if (activeLink) activeLink.classList.add('active');
-
-            // Ocultar todas las secciones
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // Mostrar la sección seleccionada
-            document.getElementById(sectionId + '-section').classList.add('active');
-
-            // Scroll arriba (suave)
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    </script>
 </body>
-
 </html>
