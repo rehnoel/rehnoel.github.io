@@ -13,7 +13,7 @@
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-color);
-    background-image: 
+    background-image:
         radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.05), transparent 25%),
         radial-gradient(circle at 85% 30%, rgba(176, 38, 255, 0.05), transparent 25%);
     background-attachment: fixed;
@@ -23,6 +23,8 @@ body {
     padding: 0;
     box-sizing: border-box;
     overflow-x: hidden;
+    /* Suaviza el scroll al cambiar de secciones */
+    scroll-behavior: smooth;
 }
 
 /* Navbar (Glassmorphism) */
@@ -38,6 +40,7 @@ nav {
     display: flex;
     justify-content: center;
     padding: 1rem 0;
+    transition: all 0.3s ease;
 }
 
 .nav-links {
@@ -56,9 +59,11 @@ nav {
     transition: color 0.3s ease, text-shadow 0.3s ease;
     cursor: pointer;
     position: relative;
+    padding-bottom: 5px;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     color: #ffffff;
     text-shadow: 0 0 10px var(--accent-glow);
 }
@@ -82,7 +87,7 @@ header {
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.5rem);
     font-weight: 700;
     margin-bottom: 0.5rem;
     background: linear-gradient(90deg, #ffffff, var(--text-muted));
@@ -91,7 +96,7 @@ h1 {
 }
 
 h2 {
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 3vw, 1.2rem);
     font-weight: 400;
     color: var(--accent-color);
     margin-bottom: 1.5rem;
@@ -116,8 +121,15 @@ h2 {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .section-title {
@@ -162,7 +174,7 @@ p {
 a {
     color: var(--accent-color);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 a:hover {
