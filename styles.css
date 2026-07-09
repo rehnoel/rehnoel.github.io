@@ -1,9 +1,9 @@
 :root {
-    --bg-color: #e8eadc; /* Light sage/beige */
+    --bg-color: #f4f4f4; /* E-ink style */
     --text-main: #111111;
     --text-muted: #555555;
     --border-color: #111111;
-    --accent-color: #111111;
+    --accent-color: #e2e8f0;
     --card-bg: transparent;
     --border-radius: 20px;
     --font-mono: 'Space Mono', 'Courier New', monospace;
@@ -137,7 +137,7 @@ header {
 }
 
 .card:hover {
-    background: rgba(0, 0, 0, 0.03);
+    background: var(--accent-color);
 }
 
 .card h4 {
@@ -183,8 +183,8 @@ a:hover {
 }
 
 .skills-tag:hover {
-    background: var(--border-color);
-    color: var(--bg-color);
+    background: var(--accent-color);
+    color: var(--text-main);
 }
 
 /* Blog specific styles */
@@ -279,7 +279,7 @@ footer {
 }
 
 .action-btn:hover {
-    background: var(--border-color);
-    color: var(--bg-color);
+    background: var(--accent-color);
+    color: var(--text-main);
     text-decoration: none;
 }
