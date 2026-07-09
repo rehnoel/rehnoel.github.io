@@ -87,11 +87,10 @@
                         <span class="control-label">SENOIDAL (ENTRADA)</span>
                         <div class="control-value">12V Pico</div>
                     </div>
-                    <label class="e-toggle">
+                    <div class="e-toggle">
                         <span class="e-toggle-text" id="lbl-sine">ON</span>
-                        <input type="checkbox" id="toggle-sine" checked>
-                        <span class="e-toggle-slider"></span>
-                    </label>
+                        <md-switch id="toggle-sine" selected></md-switch>
+                    </div>
                 </div>
 
                 <!-- Toggle 2: Media Onda -->
@@ -100,11 +99,10 @@
                         <span class="control-label">MEDIA ONDA (1 DIODO)</span>
                         <div class="control-value">Vdc = Vp / π</div>
                     </div>
-                    <label class="e-toggle">
+                    <div class="e-toggle">
                         <span class="e-toggle-text" id="lbl-half">OFF</span>
-                        <input type="checkbox" id="toggle-half">
-                        <span class="e-toggle-slider"></span>
-                    </label>
+                        <md-switch id="toggle-half"></md-switch>
+                    </div>
                 </div>
 
                 <!-- Toggle 3: Onda Completa -->
@@ -113,11 +111,10 @@
                         <span class="control-label">ONDA COMPLETA (PUENTE)</span>
                         <div class="control-value">Vdc = 2Vp / π</div>
                     </div>
-                    <label class="e-toggle">
+                    <div class="e-toggle">
                         <span class="e-toggle-text" id="lbl-full">OFF</span>
-                        <input type="checkbox" id="toggle-full">
-                        <span class="e-toggle-slider"></span>
-                    </label>
+                        <md-switch id="toggle-full"></md-switch>
+                    </div>
                 </div>
 
             </div>
@@ -236,7 +233,7 @@
             const label = document.getElementById(labelId);
             
             toggle.addEventListener('change', (e) => {
-                const isChecked = e.target.checked;
+                const isChecked = e.target.selected;
                 label.innerText = isChecked ? 'ON' : 'OFF';
                 chart.data.datasets[datasetIndex].hidden = !isChecked;
                 chart.update();

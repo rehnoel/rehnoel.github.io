@@ -12,6 +12,10 @@
     /* Material Design 3 Font Override */
     --md-sys-typescale-label-large-font: var(--font-sans);
     --md-sys-typescale-body-medium-font: var(--font-sans);
+    
+    /* Material Design 3 Color Override */
+    --md-sys-color-primary: var(--accent-color);
+    --md-sys-color-on-primary: var(--text-main);
 }
 
 body {
@@ -317,46 +321,4 @@ footer {
     font-size: 0.9rem;
     font-weight: 700;
 }
-.e-toggle input {
-    display: none;
-}
-.e-toggle-slider {
-    width: 48px;
-    height: 26px;
-    border: 2px solid var(--border-color);
-    border-radius: 13px;
-    position: relative;
-    background: transparent;
-    transition: background 0.2s, border-color 0.2s;
-}
-.e-toggle-slider::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 18px;
-    height: 18px;
-    background: var(--border-color);
-    border-radius: 50%;
-    transition: transform 0.2s, background 0.2s;
-}
-.e-toggle input:checked + .e-toggle-slider {
-    background: var(--border-color);
-}
-.e-toggle input:checked + .e-toggle-slider::after {
-    transform: translateX(22px);
-    background: var(--bg-color);
-}
-
-.e-toggle:hover .e-toggle-slider {
-    border-color: var(--accent-color);
-}
-.e-toggle:hover .e-toggle-slider::after {
-    background: var(--accent-color);
-}
-.e-toggle input:checked:hover + .e-toggle-slider {
-    background: var(--accent-color); 
-}
-.e-toggle input:checked:hover + .e-toggle-slider::after {
-    background: var(--bg-color); 
 }
