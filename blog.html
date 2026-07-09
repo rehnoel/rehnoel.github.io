@@ -10,6 +10,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Material Web Components -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+    </script>
 </head>
 <body>
     <nav>
@@ -38,7 +50,7 @@
                         <span>Electrónica Básica</span> &bull; 9 de Julio, 2026
                     </div>
                     <p>Un artículo interactivo sobre cómo funcionan los rectificadores para convertir corriente alterna en continua. Simula el comportamiento de una onda senoidal utilizando diodos en diversas configuraciones y repasa las integrales para hallar el voltaje DC.</p>
-                    <a href="rectificadores.html" class="read-more">Leer artículo interactivo</a>
+                    <md-outlined-button href="rectificadores.html">Leer artículo interactivo</md-outlined-button>
                 </article>
 
                 <!-- Artículo 1 -->
@@ -50,7 +62,7 @@
                     <p>Cuando trabajamos con frecuencias de reloj elevadas, las pistas de cobre dejan de ser simples
                         cables y se comportan como líneas de transmisión. En este artículo exploro técnicas básicas de
                         enrutamiento diferencial y adaptación de impedancias...</p>
-                    <a href="#" class="read-more">Leer artículo</a>
+                    <md-outlined-button href="#">Leer artículo</md-outlined-button>
                 </article>
 
                 <!-- Artículo 2 -->
@@ -62,7 +74,7 @@
                     <p>Los Sistemas Microelectromecánicos Biológicos (BioMEMS) ofrecen una oportunidad única para la
                         miniaturización de laboratorios (Lab-on-a-chip). Analizo cómo pueden usarse para detectar
                         biomarcadores en lunas heladas como Encélado...</p>
-                    <a href="#" class="read-more">Leer artículo</a>
+                    <md-outlined-button href="#">Leer artículo</md-outlined-button>
                 </article>
 
                 <!-- Artículo 3 -->
@@ -74,7 +86,7 @@
                     <p>Configurar analizadores lógicos embebidos (como ILA de Xilinx o SignalTap de Intel) es
                         fundamental para encontrar bugs escurridizos en sistemas digitales. Una guía paso a paso basada
                         en mis dolores de cabeza recientes...</p>
-                    <a href="#" class="read-more">Leer artículo</a>
+                    <md-outlined-button href="#">Leer artículo</md-outlined-button>
                 </article>
 
             </section>

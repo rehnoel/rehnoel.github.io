@@ -10,6 +10,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+
+    <!-- Material Web Components -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+    </script>
 </head>
 <body>
 
@@ -23,8 +35,8 @@
         <h2>Ingeniero Eléctrico Electrónico | Hardware & BioMEMS</h2>
         
         <div class="home-actions">
-            <a href="cv.html" class="action-btn">Ir al CV</a>
-            <a href="blog.html" class="action-btn">Ir al Blog</a>
+            <md-filled-button href="cv.html">Ir al CV</md-filled-button>
+            <md-filled-button href="blog.html">Ir al Blog</md-filled-button>
         </div>
     </header>
 

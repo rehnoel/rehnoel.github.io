@@ -8,6 +8,10 @@
     --border-radius: 20px;
     --font-mono: 'Space Mono', 'Courier New', monospace;
     --font-sans: 'Inter', sans-serif;
+    
+    /* Material Design 3 Font Override */
+    --md-sys-typescale-label-large-font: var(--font-sans);
+    --md-sys-typescale-body-medium-font: var(--font-sans);
 }
 
 body {
@@ -200,21 +204,7 @@ a:hover {
     color: var(--text-main);
 }
 
-.read-more {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    margin-top: 0.5rem;
-    text-decoration: none;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 2px;
-}
 
-.read-more:hover {
-    text-decoration: none;
-    border-bottom-width: 2px;
-}
 
 footer {
     text-align: center;
@@ -266,23 +256,7 @@ footer {
     gap: 1rem;
 }
 
-.action-btn {
-    display: inline-block;
-    padding: 0.8rem 1.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    text-decoration: none;
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    transition: background 0.2s ease, color 0.2s ease;
-}
 
-.action-btn:hover {
-    background: var(--border-color);
-    color: var(--accent-color);
-    text-decoration: none;
-}
 
 /* CV specific styles */
 .card-header {
