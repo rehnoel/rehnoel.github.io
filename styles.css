@@ -313,3 +313,76 @@ footer {
 .cv-list li {
     margin-bottom: 0.3rem;
 }
+
+/* Blog Entry UI (E-ink Controls) */
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.control-label {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+.control-value {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Custom E-ink Toggle */
+.e-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+.e-toggle input {
+    display: none;
+}
+.e-toggle-slider {
+    width: 48px;
+    height: 26px;
+    border: 2px solid var(--border-color);
+    border-radius: 13px;
+    position: relative;
+    background: transparent;
+    transition: background 0.2s, border-color 0.2s;
+}
+.e-toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: var(--border-color);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+}
+.e-toggle input:checked + .e-toggle-slider {
+    background: var(--border-color);
+}
+.e-toggle input:checked + .e-toggle-slider::after {
+    transform: translateX(22px);
+    background: var(--bg-color);
+}
+
+.e-toggle:hover .e-toggle-slider {
+    border-color: var(--accent-color);
+}
+.e-toggle:hover .e-toggle-slider::after {
+    background: var(--accent-color);
+}
+.e-toggle input:checked:hover + .e-toggle-slider {
+    background: var(--accent-color); 
+}
+.e-toggle input:checked:hover + .e-toggle-slider::after {
+    background: var(--bg-color); 
+}

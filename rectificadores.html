@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rectificadores | Blog Leonardo N. Hernandez</title>
+
+    <!-- Google Fonts: Inter & Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link">Inicio</a></li>
+            <li><a href="cv.html" class="nav-link">CV / Portafolio</a></li>
+            <li><a href="blog.html" class="nav-link active">Blog</a></li>
+        </ul>
+    </nav>
+
+    <header style="padding-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">Electrónica Básica</h2>
+        <h1 style="font-size: clamp(2rem, 4vw, 2.5rem);">Rectificadores de Onda</h1>
+    </header>
+
+    <div class="container" style="padding-top: 0;">
+        <div class="card" style="margin-bottom: 2rem;">
+            <p>Los rectificadores son circuitos esenciales en la electrónica de potencia, encargados de convertir corriente alterna (AC) en corriente continua (DC).</p>
+            <p>En una señal senoidal pura de voltaje de entrada, expresada como:</p>
+            <div style="overflow-x: auto; margin: 1.5rem 0;">
+                $$ V_{in}(t) = V_p \sin(\omega t) $$
+            </div>
+            <p>El valor RMS de la señal senoidal completa está dado por:</p>
+            <div style="overflow-x: auto; margin: 1.5rem 0;">
+                $$ V_{rms} = \frac{V_p}{\sqrt{2}} $$
+            </div>
+        </div>
+
+        <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 2rem;">
+            <!-- Control Panel Header -->
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-family: var(--font-mono); font-size: 0.85rem; text-transform: uppercase;">Osciloscopio Interactivo</span>
+                    <h3 style="margin-top: 0.2rem; font-family: var(--font-sans);">Simulación de Señales</h3>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 1.5rem;">CH1</div>
+            </div>
+            
+            <!-- Graph Area -->
+            <div style="padding: 1.5rem 1.5rem 0.5rem 1.5rem; background: var(--bg-color);">
+                <canvas id="rectifierChart" style="width: 100%; height: 300px;"></canvas>
+            </div>
+
+            <!-- Controls -->
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color);">
+                
+                <!-- Toggle 1: Senoidal -->
+                <div class="control-row">
+                    <div style="flex: 1;">
+                        <span class="control-label">SENOIDAL (ENTRADA)</span>
+                        <div class="control-value">12V Pico</div>
+                    </div>
+                    <label class="e-toggle">
+                        <span class="e-toggle-text" id="lbl-sine">ON</span>
+                        <input type="checkbox" id="toggle-sine" checked>
+                        <span class="e-toggle-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Toggle 2: Media Onda -->
+                <div class="control-row">
+                    <div style="flex: 1;">
+                        <span class="control-label">MEDIA ONDA (1 DIODO)</span>
+                        <div class="control-value">Vdc = Vp / π</div>
+                    </div>
+                    <label class="e-toggle">
+                        <span class="e-toggle-text" id="lbl-half">OFF</span>
+                        <input type="checkbox" id="toggle-half">
+                        <span class="e-toggle-slider"></span>
+                    </label>
+                </div>
+
+                <!-- Toggle 3: Onda Completa -->
+                <div class="control-row" style="border-bottom: none; padding-bottom: 0;">
+                    <div style="flex: 1;">
+                        <span class="control-label">ONDA COMPLETA (PUENTE)</span>
+                        <div class="control-value">Vdc = 2Vp / π</div>
+                    </div>
+                    <label class="e-toggle">
+                        <span class="e-toggle-text" id="lbl-full">OFF</span>
+                        <input type="checkbox" id="toggle-full">
+                        <span class="e-toggle-slider"></span>
+                    </label>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3 class="section-title">Análisis Matemático</h3>
+            <p><strong>Rectificador de Media Onda:</strong> Utiliza un solo diodo. Solo permite el paso del semiciclo positivo de la onda. El valor promedio de voltaje de salida (DC) se calcula integrando sobre un ciclo completo:</p>
+            <div style="overflow-x: auto; margin: 1.5rem 0;">
+                $$ V_{DC (media)} = \frac{1}{2\pi} \int_{0}^{\pi} V_p \sin(\theta) d\theta = \frac{V_p}{\pi} $$
+            </div>
+            
+            <p><strong>Rectificador de Onda Completa:</strong> Generalmente emplea un puente de 4 diodos (Puente de Graetz). Invierte el semiciclo negativo, aprovechando toda la onda. Esto duplica el voltaje promedio:</p>
+            <div style="overflow-x: auto; margin: 1.5rem 0;">
+                $$ V_{DC (completa)} = \frac{1}{\pi} \int_{0}^{\pi} V_p \sin(\theta) d\theta = \frac{2V_p}{\pi} $$
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Leonardo Nicolas Hernandez. Construido con ❤️, HTML y CSS puro.</p>
+    </footer>
+
+    <!-- Script for the Interactive Chart -->
+    <script>
+        // Generate data arrays
+        const numPoints = 200;
+        const labels = [];
+        const dataSine = [];
+        const dataHalf = [];
+        const dataFull = [];
+        
+        const Vp = 12; // Peak voltage
+        
+        for (let i = 0; i <= numPoints; i++) {
+            // Two full cycles: 0 to 4*PI
+            const t = (i / numPoints) * 4 * Math.PI; 
+            labels.push(''); 
+            
+            const sineVal = Vp * Math.sin(t);
+            dataSine.push(sineVal);
+            dataHalf.push(Math.max(0, sineVal));
+            dataFull.push(Math.abs(sineVal));
+        }
+
+        // Setup Chart
+        const ctx = document.getElementById('rectifierChart').getContext('2d');
+        const c_ink = '#111111';
+        const c_faint = 'rgba(17, 17, 17, 0.1)';
+        const c_accent = '#00e5ff';
+        
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Senoidal',
+                        data: dataSine,
+                        borderColor: c_faint, // Lighter for reference
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        borderDash: [5, 5]
+                    },
+                    {
+                        label: 'Media Onda',
+                        data: dataHalf,
+                        borderColor: c_accent, // Blue accent
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        hidden: true
+                    },
+                    {
+                        label: 'Onda Completa',
+                        data: dataFull,
+                        borderColor: c_ink, // Solid black
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        hidden: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    y: {
+                        min: -15,
+                        max: 15,
+                        grid: {
+                            color: c_faint,
+                            drawBorder: false,
+                        },
+                        ticks: {
+                            font: { family: 'Space Mono' },
+                            color: c_ink
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Toggle Logic
+        function setupToggle(toggleId, labelId, datasetIndex) {
+            const toggle = document.getElementById(toggleId);
+            const label = document.getElementById(labelId);
+            
+            toggle.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                label.innerText = isChecked ? 'ON' : 'OFF';
+                chart.data.datasets[datasetIndex].hidden = !isChecked;
+                chart.update();
+            });
+        }
+
+        setupToggle('toggle-sine', 'lbl-sine', 0);
+        setupToggle('toggle-half', 'lbl-half', 1);
+        setupToggle('toggle-full', 'lbl-full', 2);
+    </script>
+</body>
+</html>
