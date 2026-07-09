@@ -137,7 +137,7 @@ header {
 }
 
 .card:hover {
-    background: var(--accent-color);
+    background: rgba(0, 0, 0, 0.03);
 }
 
 .card h4 {
@@ -183,8 +183,8 @@ a:hover {
 }
 
 .skills-tag:hover {
-    background: var(--accent-color);
-    color: var(--text-main);
+    background: var(--border-color);
+    color: var(--accent-color);
 }
 
 /* Blog specific styles */
@@ -279,7 +279,7 @@ footer {
 }
 
 .action-btn:hover {
-    background: var(--accent-color);
-    color: var(--text-main);
+    background: var(--border-color);
+    color: var(--accent-color);
     text-decoration: none;
 }
