@@ -283,3 +283,33 @@ footer {
     color: var(--accent-color);
     text-decoration: none;
 }
+
+/* CV specific styles */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.2rem;
+}
+
+.card-header h4 {
+    margin-bottom: 0;
+}
+
+.card-date {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: right;
+    margin-left: 1rem;
+}
+
+.cv-list {
+    padding-left: 1.5rem;
+    margin-top: 0.8rem;
+    margin-bottom: 0;
+}
+
+.cv-list li {
+    margin-bottom: 0.3rem;
+}
