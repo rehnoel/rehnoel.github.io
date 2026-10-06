@@ -28,7 +28,7 @@
       import '@material/web/all.js';
     </script>
 </head>
-<body class="bh3d-body">
+<body style="margin: 0; padding: 0; overflow: hidden; background-color: #000;">
 
     <!-- Visor de errores -->
     <div id="error-overlay" style="display:none; position:absolute; z-index:99999; background:#900; color:#fff; padding:2rem; top:0; left:0; width:100%; height:100%; overflow:auto; font-family:monospace;">
@@ -36,45 +36,30 @@
         <div id="error-log"></div>
     </div>
 
-    <div class="bh3d-layout">
-        <!-- PANEL LATERAL -->
-        <aside class="bh3d-sidebar">
-            <header class="bh3d-header">
-                <h1>Simulación 3D Realista</h1>
-                <p>Usa tu dedo o el ratón en la imagen para orbitar alrededor del agujero negro. Observa cómo su inmensa gravedad dobla la luz del disco.</p>
-                <div style="margin-top: 1rem;">
-                    <a href="agujero-negro.html" style="font-family: var(--font-mono); font-size: 0.8rem;">&larr; Volver al diagrama anatómico</a>
-                </div>
-            </header>
+    <!-- Contenedor a pantalla completa -->
+    <div id="canvas-container" style="position: relative; width: 100vw; height: 100vh; overflow: hidden;">
+        
+        <!-- Interfaz superpuesta limpia -->
+        <div style="position: absolute; top: 2rem; left: 2rem; z-index: 100; pointer-events: none;">
+            <a href="agujero-negro.html" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: opacity 0.2s;">&larr; Regresar atrás</a>
+            <h1 style="margin: 0; color: #f4f4f4; font-family: var(--font-sans, 'Inter', sans-serif); font-size: 2rem; font-weight: 600; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,1.0);">Simulación de Agujero Negro</h1>
+        </div>
 
-            <div class="bh3d-controls-container">
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-top: 0.5rem;">
-                    En esta simulación, los efectos de la <strong>Relatividad General</strong> de Einstein (Lente Gravitacional) y de la <strong>Relatividad Especial</strong> (Efecto Doppler) se calculan matemáticamente en tiempo real en la tarjeta gráfica.
-                    <br><br>
-                    El disco de gas súper caliente gira a enormes velocidades. Debido a la dilatación del tiempo y el beaming relativista, la luz que avanza hacia el observador se comprime, viéndose más brillante y concentrada que la luz que se aleja.
-                </p>
-            </div>
-        </aside>
-
-        <!-- LIENZO 3D -->
-        <main class="bh3d-canvas-area" id="canvas-container">
-            <canvas id="glcanvas"></canvas>
-            
-            <div class="bh3d-overlay-hint" id="hint-drag">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
-                    <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
-                    <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                </svg>
-                Arrastra para rotar
-            </div>
-        </main>
+        <canvas id="glcanvas"></canvas>
+        
+        <div class="bh3d-overlay-hint" id="hint-drag">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            Arrastra para rotar
+        </div>
     </div>
 
-    <!-- Script Inline para evitar bloqueos CORS locales -->
     <script type="module">
         window.onerror = function(msg, url, line) {
             const errDiv = document.getElementById('error-overlay');
@@ -206,19 +191,16 @@
                         }
                     }
                     
-                    // SOLUCIÓN AL BUG DEL ZOOM: 
-                    // Si estamos muy lejos del agujero negro (> 15.0 unidades), damos un salto gigante 
-                    // en el espacio vacío en lugar de malgastar iteraciones.
+                    // SOLUCIÓN AL BUG DEL ZOOM
                     float stepSize;
                     if (r > 15.0) {
-                        stepSize = r - 14.5; // Salto directo al borde del disco
+                        stepSize = r - 14.5; 
                     } else {
                         stepSize = dt * min(1.5, max(0.5, r * 0.3));
                     }
                     
                     rayPos += rayDir * stepSize;
                     
-                    // Condición de salida por escape hacia el infinito
                     if(r > 70.0 || transmittance < 0.01) break;
                 }
                 
@@ -248,7 +230,8 @@
 
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-                camera.position.set(0, 3, 15); 
+                // Inicio en el zoom más lejano (r = ~49)
+                camera.position.set(0, 10, 48); 
 
                 orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 
