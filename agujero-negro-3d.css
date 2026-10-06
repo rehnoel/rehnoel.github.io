@@ -1,0 +1,181 @@
+/* =========================================================
+   Visualizador 3D: Agujero Negro Realista
+   Reutiliza los colores e-ink pero con un layout inmersivo
+   ========================================================= */
+
+body.bh3d-body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Evita el scroll, es una app web fullscreen */
+    background-color: var(--bg-color);
+    display: flex;
+    height: 100vh;
+    font-family: var(--font-sans);
+}
+
+/* ---------- Layout Principal ---------- */
+.bh3d-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* ---------- Panel Lateral (Controles) ---------- */
+.bh3d-sidebar {
+    width: 380px;
+    min-width: 380px;
+    background: var(--bg-color);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+}
+
+.bh3d-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.bh3d-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.bh3d-header h1 {
+    font-size: 1.8rem;
+    margin: 0.5rem 0 0.2rem 0;
+    line-height: 1.1;
+}
+
+.bh3d-header p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 0;
+    margin-top: 0.5rem;
+}
+
+.bh3d-controls-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+.bh3d-control-group {
+    margin-bottom: 2rem;
+}
+
+.bh3d-control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.bh3d-control-value {
+    color: var(--accent-color);
+    font-weight: 400;
+}
+
+md-slider {
+    width: 100%;
+    --md-sys-color-primary: var(--accent-color);
+}
+
+.bh3d-switch-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.bh3d-switch-row:last-child {
+    border-bottom: none;
+}
+
+.bh3d-switch-label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.bh3d-switch-desc {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+/* ---------- Lienzo 3D ---------- */
+.bh3d-canvas-area {
+    flex: 1;
+    position: relative;
+    background-color: #000; /* Fondo negro para el espacio */
+    cursor: grab;
+}
+
+.bh3d-canvas-area:active {
+    cursor: grabbing;
+}
+
+#glcanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ---------- Instrucciones en pantalla ---------- */
+.bh3d-overlay-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(17, 17, 17, 0.75);
+    color: var(--bg-color);
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeOut 1s forwards 4s; /* Desaparece después de 4s */
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; visibility: hidden; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    .bh3d-layout {
+        flex-direction: column;
+    }
+    .bh3d-sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        order: 2; /* Controles abajo en móvil */
+    }
+    .bh3d-canvas-area {
+        height: 55vh;
+        order: 1; /* Visualizador arriba en móvil */
+    }
+    .bh3d-header {
+        padding: 1rem;
+    }
+    .bh3d-controls-container {
+        padding: 1rem;
+    }
+}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Visualizador 3D: Agujero Negro | Blog Leonardo N. Hernandez</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="agujero-negro-3d.css">
+
+    <!-- Material Web Components -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/",
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+    </script>
+</head>
+<body class="bh3d-body">
+
+    <div class="bh3d-layout">
+        
+        <!-- PANEL LATERAL -->
+        <aside class="bh3d-sidebar">
+            <header class="bh3d-header">
+                <div class="bh3d-kicker">Mediación Museográfica</div>
+                <h1>Simulación 3D Realista</h1>
+                <p>Usa tu dedo o el ratón en la imagen para orbitar alrededor del agujero negro. Observa cómo su inmensa gravedad dobla la luz del disco de acreción.</p>
+                <div style="margin-top: 1rem;">
+                    <a href="agujero-negro.html" style="font-family: var(--font-mono); font-size: 0.8rem;">&larr; Volver al diagrama anatómico</a>
+                </div>
+            </header>
+
+            <div class="bh3d-controls-container">
+                
+                <div class="bh3d-control-group">
+                    <div class="bh3d-control-header">
+                        <span>DENSIDAD DEL DISCO</span>
+                        <span class="bh3d-control-value" id="val-density">Media</span>
+                    </div>
+                    <md-slider id="sl-density" min="0.0" max="2.0" step="0.1" value="1.0" aria-label="Densidad del disco"></md-slider>
+                </div>
+
+                <div class="bh3d-control-group">
+                    <div class="bh3d-control-header">
+                        <span>VELOCIDAD DEL TIEMPO</span>
+                        <span class="bh3d-control-value" id="val-speed">Normal</span>
+                    </div>
+                    <md-slider id="sl-speed" min="0.0" max="3.0" step="0.1" value="1.0" aria-label="Velocidad del tiempo"></md-slider>
+                </div>
+
+                <div class="bh3d-control-group">
+                    <div class="bh3d-control-header">
+                        <span>TEMPERATURA (COLOR)</span>
+                        <span class="bh3d-control-value" id="val-color">Rayos X (Cian)</span>
+                    </div>
+                    <md-slider id="sl-color" min="0.0" max="1.0" step="0.05" value="0.5" aria-label="Temperatura del disco"></md-slider>
+                </div>
+
+                <div class="bh3d-switch-row" style="border-top: 1px solid var(--border-color);">
+                    <div>
+                        <div class="bh3d-switch-label">LENTE GRAVITACIONAL</div>
+                        <div class="bh3d-switch-desc">Curvatura del espacio-tiempo</div>
+                    </div>
+                    <md-switch id="sw-lensing" selected></md-switch>
+                </div>
+
+                <div class="bh3d-switch-row">
+                    <div>
+                        <div class="bh3d-switch-label">EFECTO DOPPLER</div>
+                        <div class="bh3d-switch-desc">Luz concentrada por el giro</div>
+                    </div>
+                    <md-switch id="sw-doppler" selected></md-switch>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- LIENZO 3D -->
+        <main class="bh3d-canvas-area" id="canvas-container">
+            <canvas id="glcanvas"></canvas>
+            
+            <div class="bh3d-overlay-hint">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                    <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                    <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                Arrastra para rotar la cámara
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Cargar Lógica 3D -->
+    <script type="module" src="js/agujero-negro-3d.js"></script>
+</body>
+</html>
