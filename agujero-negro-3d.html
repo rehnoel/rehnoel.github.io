@@ -30,7 +30,7 @@
 </head>
 <body class="bh3d-body">
 
-    <!-- Visor de errores (Oculto por defecto) -->
+    <!-- Visor de errores -->
     <div id="error-overlay" style="display:none; position:absolute; z-index:99999; background:#900; color:#fff; padding:2rem; top:0; left:0; width:100%; height:100%; overflow:auto; font-family:monospace;">
         <h2>Error Crítico</h2>
         <div id="error-log"></div>
@@ -40,7 +40,6 @@
         <!-- PANEL LATERAL -->
         <aside class="bh3d-sidebar">
             <header class="bh3d-header">
-                <div class="bh3d-kicker">Mediación Museográfica</div>
                 <h1>Simulación 3D Realista</h1>
                 <p>Usa tu dedo o el ratón en la imagen para orbitar alrededor del agujero negro. Observa cómo su gravedad dobla la luz del disco.</p>
                 <div style="margin-top: 1rem;">
@@ -51,10 +50,10 @@
             <div class="bh3d-controls-container">
                 <div class="bh3d-control-group">
                     <div class="bh3d-control-header">
-                        <span>DENSIDAD DEL DISCO</span>
-                        <span class="bh3d-control-value" id="val-density">Media</span>
+                        <span>TAMAÑO DEL DISCO</span>
+                        <span class="bh3d-control-value" id="val-size">Normal</span>
                     </div>
-                    <md-slider id="sl-density" min="0.0" max="2.0" step="0.1" value="1.0" aria-label="Densidad"></md-slider>
+                    <md-slider id="sl-size" min="0.0" max="2.0" step="0.1" value="1.0" aria-label="Tamaño"></md-slider>
                 </div>
                 
                 <div class="bh3d-switch-row" style="border-top: 1px solid var(--border-color);">
@@ -92,9 +91,8 @@
         </main>
     </div>
 
-    <!-- Script Inline para evitar bloqueos CORS locales -->
+    <!-- Script Inline para evitar bloqueos CORS -->
     <script type="module">
-        // Atrapamos errores para verlos en pantalla si algo falla localmente
         window.onerror = function(msg, url, line) {
             const errDiv = document.getElementById('error-overlay');
             errDiv.style.display = 'block';
@@ -120,7 +118,7 @@
             uniform vec3 u_cameraUp;
             uniform vec3 u_cameraRight;
             uniform float u_fov;
-            uniform float u_density;
+            uniform float u_size;
             uniform float u_lensing;
             uniform float u_doppler;
 
@@ -157,13 +155,15 @@
             float getDiskDensity(vec3 p) {
                 float r = length(p.xz);
                 
-                if(r < 2.6 || r > 12.0) return 0.0;
+                // Calculamos el radio máximo dinámicamente según el deslizador de Tamaño
+                float maxR = 6.0 + u_size * 5.0; // Rango de 6.0 a 16.0
+                
+                if(r < 2.6 || r > maxR) return 0.0;
                 
                 float h = abs(p.y);
                 float scaleH = exp(-h * 5.0);
                 if(scaleH < 0.01) return 0.0;
                 
-                // Velocidad diferencial baja (Agujero Supermasivo)
                 float angularSpeed = 0.08 * 6.0 / pow(max(r, 0.1), 1.5);
                 vec3 pRot = p;
                 pRot.xz *= rot(-u_time * angularSpeed);
@@ -173,9 +173,12 @@
                 
                 float clouds = fbm(pRot * 3.0);
                 float density = rings * clouds * scaleH;
-                float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(12.0, 8.0, r);
                 
-                return density * fadeR * u_density * 4.0;
+                // Difuminado proporcional al tamaño máximo para que los bordes se vean suaves
+                float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(maxR, maxR * 0.75, r);
+                
+                // Densidad general constante
+                return density * fadeR * 4.0;
             }
 
             void main() {
@@ -190,9 +193,8 @@
                 vec3 col = vec3(0.0);
                 float transmittance = 1.0;
                 
-                // Paleta de colores cálidos y fijos
-                vec3 hot = vec3(1.0, 0.5, 0.1); // Naranja brillante
-                vec3 cold = vec3(0.4, 0.05, 0.0); // Rojo oscuro
+                vec3 hot = vec3(1.0, 0.5, 0.1);
+                vec3 cold = vec3(0.4, 0.05, 0.0);
                 
                 float dt = 0.06;
                 const int MAX_STEPS = 250;
@@ -211,7 +213,7 @@
                         rayDir = normalize(rayDir + force * 2.5 * dt);
                     }
                     
-                    if(abs(rayPos.y) < 2.0 && r < 14.0) {
+                    if(abs(rayPos.y) < 2.0 && r < 18.0) {
                         float d = getDiskDensity(rayPos);
                         if(d > 0.0) {
                             float temp = smoothstep(12.0, 2.6, r);
@@ -230,19 +232,15 @@
                         }
                     }
                     
-                    // SOLUCIÓN AL BUG DEL ZOOM: 
-                    // Si estamos muy lejos del agujero negro (> 15.0 unidades), damos un salto gigante 
-                    // en el espacio vacío en lugar de malgastar iteraciones.
                     float stepSize;
-                    if (r > 15.0) {
-                        stepSize = r - 14.5; // Salto directo al borde del disco
+                    if (r > 19.0) {
+                        stepSize = r - 18.5; 
                     } else {
                         stepSize = dt * min(1.5, max(0.5, r * 0.3));
                     }
                     
                     rayPos += rayDir * stepSize;
                     
-                    // Condición de salida por escape hacia el infinito
                     if(r > 70.0 || transmittance < 0.01) break;
                 }
                 
@@ -263,8 +261,8 @@
         const DOM = {
             container: document.getElementById('canvas-container'),
             canvas: document.getElementById('glcanvas'),
-            density: document.getElementById('sl-density'),
-            valDensity: document.getElementById('val-density'),
+            size: document.getElementById('sl-size'),
+            valSize: document.getElementById('val-size'),
             lensing: document.getElementById('sw-lensing'),
             doppler: document.getElementById('sw-doppler')
         };
@@ -276,7 +274,7 @@
 
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-                camera.position.set(0, 3, 15); 
+                camera.position.set(0, 3, 18); 
 
                 orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 
@@ -289,7 +287,6 @@
                 controls.dampingFactor = 0.05;
                 controls.enablePan = false;
                 controls.minDistance = 6;
-                // Distancia ampliada. ¡Ahora puedes alejarte con seguridad!
                 controls.maxDistance = 50; 
 
                 const geometry = new THREE.PlaneGeometry(2, 2);
@@ -304,7 +301,7 @@
                         u_cameraUp: { value: new THREE.Vector3() },
                         u_cameraRight: { value: new THREE.Vector3() },
                         u_fov: { value: camera.fov },
-                        u_density: { value: 1.0 },
+                        u_size: { value: 1.0 },
                         u_lensing: { value: 1.0 },
                         u_doppler: { value: 1.0 }
                     },
@@ -336,11 +333,11 @@
                 return isNaN(v) ? def : v;
             };
 
-            if(DOM.density) DOM.density.addEventListener('input', (e) => {
-                material.uniforms.u_density.value = safeRead(e.target, 1.0);
+            if(DOM.size) DOM.size.addEventListener('input', (e) => {
                 const val = safeRead(e.target, 1.0);
-                const labels = ["Gaseoso", "Ligero", "Normal", "Denso", "Opaco"];
-                DOM.valDensity.textContent = labels[Math.floor((val / 2.0) * 4)] || "Opaco";
+                material.uniforms.u_size.value = val;
+                const labels = ["Mínimo", "Pequeño", "Normal", "Grande", "Gigante"];
+                DOM.valSize.textContent = labels[Math.floor((val / 2.0) * 4.0)] || "Gigante";
             });
             if(DOM.lensing) DOM.lensing.addEventListener('change', (e) => {
                 material.uniforms.u_lensing.value = e.target.selected ? 1.0 : 0.0;
