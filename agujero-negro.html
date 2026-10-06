@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomía de un agujero negro | Blog Leonardo N. Hernandez</title>
+
+    <!-- Google Fonts: Inter & Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="agujero-negro.css">
+
+    <!-- Material Web Components -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+    </script>
+
+    <script src="js/agujero-negro.js" defer></script>
+</head>
+<body>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link">Inicio</a></li>
+            <li><a href="cv.html" class="nav-link">CV / Portafolio</a></li>
+            <li><a href="blog.html" class="nav-link active">Blog</a></li>
+        </ul>
+    </nav>
+
+    <header style="padding-bottom: 2rem;">
+        <h2 style="margin-bottom: 0.5rem;">Divulgación · Mediación</h2>
+        <h1 style="font-size: clamp(2rem, 4vw, 2.5rem);">Anatomía de un agujero negro</h1>
+    </header>
+
+    <div class="container" style="padding-top: 0;">
+        <div class="card" style="margin-bottom: 2rem;">
+            <p>Un agujero negro no es un hoyo: es una enorme cantidad de materia concentrada en un espacio tan pequeño que su gravedad no deja escapar nada, ni siquiera la luz. Aunque no podemos verlo directamente, a su alrededor ocurren algunos de los fenómenos más extremos del universo.</p>
+            <p style="margin-bottom: 0;">Explora sus partes tocando el diagrama. Cambia la <strong>masa</strong> para ver de qué tamaño sería cada región y aumenta la <strong>rotación</strong> para descubrir qué cambia cuando el agujero negro gira.</p>
+        </div>
+
+        <!-- ================= VISUALIZADOR ================= -->
+        <div class="bh-card" id="bh-card">
+            <div class="bh-head">
+                <div>
+                    <span class="bh-kicker">Visualizador interactivo</span>
+                    <h3>Partes de un agujero negro</h3>
+                </div>
+                <div class="bh-head-right">
+                    <div class="bh-readout">
+                        <span id="bh-readout-mass">Sagitario A*</span>
+                        <span id="bh-readout-spin">a = 0.00</span>
+                    </div>
+                    <md-outlined-button id="bh-present">Pantalla completa</md-outlined-button>
+                </div>
+            </div>
+
+            <div class="bh-stage">
+                <svg id="bh-svg" class="bh-svg" viewBox="0 0 800 580" role="img"
+                     aria-label="Diagrama de un agujero negro con disco de acreción, chorros, esfera de fotones, horizonte de eventos y singularidad">
+                    <defs>
+                        <!-- Gradiente del disco: más denso (caliente) hacia el borde interior -->
+                        <radialGradient id="diskGrad" gradientUnits="userSpaceOnUse" cx="400" cy="290" r="364"
+                                        gradientTransform="translate(0 226.2) scale(1 0.22)">
+                            <stop id="diskStop" offset="0.46" stop-color="#111111" stop-opacity="0.85"/>
+                            <stop offset="0.7" stop-color="#111111" stop-opacity="0.3"/>
+                            <stop offset="1" stop-color="#111111" stop-opacity="0.04"/>
+                        </radialGradient>
+                        <radialGradient id="diskGradSel" gradientUnits="userSpaceOnUse" cx="400" cy="290" r="364"
+                                        gradientTransform="translate(0 226.2) scale(1 0.22)">
+                            <stop id="diskStopSel" offset="0.46" stop-color="#00e5ff" stop-opacity="1"/>
+                            <stop offset="0.7" stop-color="#00e5ff" stop-opacity="0.45"/>
+                            <stop offset="1" stop-color="#00e5ff" stop-opacity="0.08"/>
+                        </radialGradient>
+                        <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                            <line x1="0" y1="0" x2="0" y2="7" stroke="#111111" stroke-width="1.1" stroke-opacity="0.55"/>
+                        </pattern>
+                        <pattern id="hatchSel" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                            <line x1="0" y1="0" x2="0" y2="7" stroke="#00e5ff" stroke-width="2.2"/>
+                        </pattern>
+                    </defs>
+
+                    <!-- Fondo -->
+                    <g id="bh-stars" class="bh-stars"></g>
+
+                    <!-- Chorros relativistas -->
+                    <g class="part" data-part="chorros">
+                        <g id="jets-inner">
+                            <path id="jet-up" class="jet-shape"/>
+                            <path id="jet-down" class="jet-shape"/>
+                            <g id="jet-flows"></g>
+                        </g>
+                    </g>
+
+                    <!-- Lente gravitacional (imagen doblada de la parte trasera del disco) -->
+                    <g class="part" data-part="lente" id="p-lens">
+                        <path id="lens-upper" class="lens-band"/>
+                        <path id="lens-lower" class="lens-band"/>
+                        <circle id="lens-shadow" class="lens-shadow" cx="400" cy="290"/>
+                    </g>
+
+                    <!-- Mitad trasera del disco -->
+                    <g class="part" data-part="disco">
+                        <path id="disk-back" class="disk-shape"/>
+                    </g>
+                    <g class="part" data-part="isco">
+                        <path id="isco-back" class="ring ring-dashed"/>
+                        <path id="isco-back-hit" class="hit"/>
+                    </g>
+                    <g id="particles-back" class="particles"></g>
+
+                    <!-- Horizonte de eventos -->
+                    <g class="part" data-part="horizonte">
+                        <circle id="horizon" class="horizon-shape" cx="400" cy="290"/>
+                    </g>
+
+                    <!-- Ergosfera (solo con rotación) -->
+                    <g class="part" data-part="ergosfera" id="p-ergo">
+                        <path id="ergo" class="ring ring-dashed"/>
+                        <path id="ergo-hit" class="hit"/>
+                    </g>
+
+                    <!-- Esfera de fotones -->
+                    <g class="part" data-part="fotones">
+                        <path id="ph-band" class="ph-band"/>
+                        <circle id="ph-ret" class="ring ring-dotted" cx="400" cy="290"/>
+                        <circle id="ph-pro" class="ring ring-dotted" cx="400" cy="290"/>
+                        <path id="ph-hit" class="hit-area"/>
+                    </g>
+
+                    <!-- Singularidad -->
+                    <g class="part" data-part="singularidad">
+                        <circle id="sing-dot" class="sing-dot" cx="400" cy="290" r="3.5"/>
+                        <ellipse id="sing-ring" class="sing-ring" cx="400" cy="290"/>
+                        <circle class="hit-area" cx="400" cy="290" r="13"/>
+                    </g>
+
+                    <!-- Mitad delantera del disco -->
+                    <g class="part" data-part="disco">
+                        <path id="disk-front" class="disk-shape"/>
+                    </g>
+                    <g class="part" data-part="isco">
+                        <path id="isco-front" class="ring ring-dashed"/>
+                        <path id="isco-front-hit" class="hit"/>
+                    </g>
+                    <g id="particles-front" class="particles"></g>
+
+                    <!-- Etiquetas -->
+                    <g id="bh-labels"></g>
+                </svg>
+
+                <div class="bh-chips" id="bh-chips" role="group" aria-label="Partes del agujero negro"></div>
+            </div>
+
+            <div class="bh-side">
+                <!-- Ficha informativa -->
+                <div class="bh-info" id="bh-info" aria-live="polite">
+                    <span class="bh-info-tag" id="info-tag"></span>
+                    <h3 id="info-title"></h3>
+                    <p class="bh-info-short" id="info-short"></p>
+                    <p id="info-body"></p>
+                    <dl class="bh-data" id="info-data"></dl>
+                    <div class="bh-question">
+                        <span class="bh-question-label">Pregunta para el público</span>
+                        <p id="info-question"></p>
+                    </div>
+                </div>
+
+                <!-- Controles -->
+                <div class="bh-controls">
+                    <div class="bh-control-block">
+                        <span class="control-label">MASA</span>
+                        <div class="control-value" id="bh-mass-desc"></div>
+                        <div class="bh-mass-grid" id="bh-mass-grid"></div>
+                    </div>
+
+                    <div class="bh-control-block">
+                        <div class="bh-control-headline">
+                            <span class="control-label">ROTACIÓN (ESPÍN)</span>
+                            <span class="control-value" id="bh-spin-desc">a = 0.00 · sin rotación</span>
+                        </div>
+                        <md-slider id="bh-spin" min="0" max="0.99" step="0.01" value="0" labeled aria-label="Rotación del agujero negro"></md-slider>
+                    </div>
+
+                    <div class="control-row">
+                        <div style="flex: 1;">
+                            <span class="control-label">ETIQUETAS</span>
+                            <div class="control-value">Nombres sobre el diagrama</div>
+                        </div>
+                        <md-switch id="sw-labels" selected aria-label="Mostrar etiquetas"></md-switch>
+                    </div>
+                    <div class="control-row">
+                        <div style="flex: 1;">
+                            <span class="control-label">LENTE GRAVITACIONAL</span>
+                            <div class="control-value">La luz doblada por la gravedad</div>
+                        </div>
+                        <md-switch id="sw-lens" selected aria-label="Mostrar lente gravitacional"></md-switch>
+                    </div>
+                    <div class="control-row">
+                        <div style="flex: 1;">
+                            <span class="control-label">ANIMACIÓN</span>
+                            <div class="control-value">Movimiento del disco y los chorros</div>
+                        </div>
+                        <md-switch id="sw-anim" selected aria-label="Animación"></md-switch>
+                    </div>
+                    <div class="control-row" style="border-bottom: none;">
+                        <div style="flex: 1;">
+                            <span class="control-label">RECORRIDO AUTOMÁTICO</span>
+                            <div class="control-value">Modo exhibición: avanza solo cada 10 s</div>
+                        </div>
+                        <md-switch id="sw-tour" aria-label="Recorrido automático"></md-switch>
+                    </div>
+
+                    <div class="bh-control-block" style="border-bottom: none; padding-bottom: 0;">
+                        <span class="control-label">MEDIDAS PARA ESTA MASA Y ROTACIÓN</span>
+                        <dl class="bh-data" id="bh-measures" style="margin-bottom: 0;"></dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= GUÍA DE MEDIACIÓN ================= -->
+        <div class="card">
+            <h3 class="section-title">Guía para la mediación</h3>
+            <p><strong>Recorrido sugerido.</strong> Los botones numerados siguen un orden de afuera hacia adentro: empezamos por lo que sí podemos observar (el disco y los chorros) y terminamos en lo que nunca veremos (la singularidad). La ergosfera y la lente gravitacional quedan al final como “extras” para públicos curiosos.</p>
+            <p><strong>Mitos frecuentes:</strong></p>
+            <ul class="cv-list" style="margin-bottom: 1rem;">
+                <li><em>“Los agujeros negros lo aspiran todo.”</em> Lejos de ellos, su gravedad es igual a la de cualquier objeto con la misma masa. Si el Sol se convirtiera en un agujero negro, la Tierra seguiría en la misma órbita (aunque muy fría).</li>
+                <li><em>“Es un hoyo en el espacio.”</em> Es justo lo contrario: muchísima materia en muy poco espacio.</li>
+                <li><em>“Nunca se han visto.”</em> El Event Horizon Telescope fotografió la sombra de M87* (2019) y de Sagitario A* (2022), y desde 2015 LIGO detecta las ondas gravitacionales de sus choques.</li>
+            </ul>
+            <p><strong>Consejos de uso:</strong> usa <em>Pantalla completa</em> en una tablet o proyector, activa el <em>Recorrido automático</em> cuando el módulo esté sin mediador y avanza con las flechas <span class="bh-kbd">←</span> <span class="bh-kbd">→</span> del teclado.</p>
+            <p class="control-value" style="margin-bottom: 0;">Nota: los radios del diagrama están a escala entre sí (en unidades de GM/c², métrica de Kerr, vista desde el plano ecuatorial). La inclinación del disco y la forma de la lente son representaciones simplificadas.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Leonardo Nicolas Hernandez. Construido con ❤️, HTML y CSS puro.</p>
+    </footer>
+</body>
+</html>

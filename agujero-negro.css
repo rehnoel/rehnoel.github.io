@@ -1,0 +1,372 @@
+/* =========================================================
+   Visualizador: Anatomía de un agujero negro
+   Estética e-ink del blog (tinta #111, fondo #f4f4f4, acento cian)
+   ========================================================= */
+
+.bh-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--bg-color);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+/* ---------- Cabecera ---------- */
+.bh-head {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.bh-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.bh-head h3 {
+    margin-top: 0.2rem;
+    font-family: var(--font-sans);
+}
+
+.bh-head-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bh-readout {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+#bh-readout-mass {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+/* ---------- Escenario (SVG) ---------- */
+.bh-stage {
+    padding: 1rem 1rem 0;
+}
+
+.bh-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.bh-star { fill: #111111; opacity: 0.22; }
+
+.part {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.ring {
+    fill: none;
+    stroke: #111111;
+    stroke-width: 1.6;
+    transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+.ring-dashed { stroke-dasharray: 7 5; }
+.ring-dotted { stroke-dasharray: 2 4; stroke-linecap: round; stroke-width: 2; }
+
+/* Zonas de toque más anchas que el trazo visible */
+.hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 18;
+    pointer-events: stroke;
+}
+.hit-area {
+    fill: transparent;
+    fill-rule: evenodd;
+    stroke: transparent;
+    stroke-width: 16;
+    pointer-events: all;
+}
+
+.horizon-shape {
+    fill: #111111;
+    stroke: #111111;
+    stroke-width: 1.5;
+    transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.disk-shape {
+    fill: url(#diskGrad);
+    stroke: #111111;
+    stroke-width: 1.1;
+}
+
+.jet-shape {
+    fill: rgba(17, 17, 17, 0.05);
+    stroke: #111111;
+    stroke-width: 1.1;
+}
+.jet-flow {
+    fill: none;
+    stroke: #111111;
+    stroke-width: 2;
+    stroke-dasharray: 3 13;
+    stroke-linecap: round;
+}
+
+.lens-band {
+    fill: url(#hatch);
+    stroke: #111111;
+    stroke-width: 0.9;
+}
+.lens-shadow {
+    fill: none;
+    stroke: #111111;
+    stroke-width: 1.2;
+    stroke-dasharray: 1 5;
+    stroke-linecap: round;
+}
+
+.ph-band {
+    fill: rgba(17, 17, 17, 0.1);
+    fill-rule: evenodd;
+    stroke: none;
+}
+
+.sing-dot { fill: var(--bg-color); }
+.sing-ring { fill: none; stroke: var(--bg-color); stroke-width: 2; }
+
+.particles { pointer-events: none; transition: opacity 0.3s ease; }
+.particle, .plunger { fill: #111111; }
+
+/* Hover */
+.part:hover .ring { stroke-width: 2.6; }
+.part:hover .horizon-shape { stroke: #555555; stroke-width: 3; }
+.part:hover .disk-shape,
+.part:hover .jet-shape,
+.part:hover .lens-band { stroke-width: 2; }
+
+/* ---------- Selección ---------- */
+.part.is-selected .ring { stroke: var(--accent-color); stroke-width: 3.5; }
+.part.is-selected .horizon-shape { stroke: var(--accent-color); stroke-width: 4; }
+.part.is-selected .disk-shape { fill: url(#diskGradSel); stroke: var(--accent-color); stroke-width: 2.5; }
+.part.is-selected .jet-shape { fill: rgba(0, 229, 255, 0.15); stroke: var(--accent-color); stroke-width: 2.5; }
+.part.is-selected .jet-flow { stroke: var(--accent-color); }
+.part.is-selected .lens-band { fill: url(#hatchSel); stroke: var(--accent-color); stroke-width: 2; }
+.part.is-selected .lens-shadow { stroke: var(--accent-color); stroke-width: 2.5; }
+.part.is-selected .ph-band { fill: rgba(0, 229, 255, 0.35); }
+.part.is-selected .sing-dot { fill: var(--accent-color); r: 5; }
+.part.is-selected .sing-ring { stroke: var(--accent-color); stroke-width: 3; }
+
+.bh-svg.has-selection .part:not(.is-selected),
+.bh-svg.has-selection .bh-label:not(.is-selected) {
+    opacity: 0.28;
+}
+.bh-svg.has-selection:not([data-sel="disco"]):not([data-sel="isco"]) .particles { opacity: 0.28; }
+.bh-svg[data-sel="disco"] .particle { fill: var(--accent-color); }
+.bh-svg[data-sel="isco"] .plunger { fill: var(--accent-color); }
+
+/* ---------- Etiquetas ---------- */
+.bh-label { cursor: pointer; transition: opacity 0.3s ease; }
+.bh-label-halo { stroke: var(--bg-color); stroke-width: 4; }
+.bh-label-line { stroke: #111111; stroke-width: 1; }
+.bh-label-dot { fill: #111111; stroke: var(--bg-color); stroke-width: 1.5; }
+.bh-label text {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    fill: #111111;
+    paint-order: stroke;
+    stroke: var(--bg-color);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+}
+.bh-label.is-selected text { font-weight: 700; }
+.bh-label.is-selected .bh-label-dot { fill: var(--accent-color); stroke: #111111; }
+
+/* ---------- Botones de partes ---------- */
+.bh-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem 1.25rem;
+}
+
+.bh-chip,
+.bh-mass {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-main);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 0.35rem 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.bh-chip:hover,
+.bh-mass:hover { background: rgba(0, 0, 0, 0.06); }
+.bh-chip:focus-visible,
+.bh-mass:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+.bh-chip .num { color: var(--text-muted); margin-right: 0.4rem; }
+.bh-chip[aria-pressed="true"],
+.bh-mass[aria-pressed="true"] {
+    background: var(--border-color);
+    color: var(--accent-color);
+}
+.bh-chip[aria-pressed="true"] .num { color: var(--bg-color); }
+
+/* ---------- Ficha informativa ---------- */
+.bh-info {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.bh-info-tag {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.bh-info h3 {
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+    margin: 0.2rem 0 0.6rem;
+}
+
+.bh-info-short {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.bh-data {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35rem 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.8rem 0;
+    margin: 1rem 0;
+}
+.bh-data:empty { display: none; }
+.bh-data dt { color: var(--text-muted); text-transform: uppercase; }
+.bh-data dd { margin: 0; }
+
+.bh-question {
+    border: 1px dashed var(--border-color);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+}
+.bh-question-label {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    background: var(--border-color);
+    color: var(--accent-color);
+    border-radius: 20px;
+    padding: 0.1rem 0.6rem;
+    margin-bottom: 0.5rem;
+}
+.bh-question p { margin: 0; }
+
+/* ---------- Controles ---------- */
+.bh-controls {
+    padding: 0.5rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.bh-control-block {
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.bh-control-headline {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.bh-mass-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+}
+
+#bh-spin {
+    width: 100%;
+    margin-top: 0.4rem;
+}
+
+.bh-kbd {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0 0.4rem;
+}
+
+/* ---------- Modo presentación (tablet / proyector) ---------- */
+body.bh-lock { overflow: hidden; }
+
+.bh-card.is-presenting {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+}
+.bh-card.is-presenting .bh-head { grid-column: 1 / -1; }
+.bh-card.is-presenting .bh-stage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+    border-right: 1px solid var(--border-color);
+}
+.bh-card.is-presenting .bh-svg { max-height: calc(100vh - 14rem); }
+.bh-card.is-presenting .bh-chips { justify-content: center; }
+.bh-card.is-presenting .bh-side { overflow-y: auto; min-height: 0; }
+.bh-card.is-presenting .bh-info { border-top: none; }
+.bh-card.is-presenting .bh-info h3 { font-size: 2.1rem; }
+.bh-card.is-presenting .bh-info-short { font-size: 1.3rem; }
+.bh-card.is-presenting .bh-info p { font-size: 1.05rem; }
+
+@media (max-width: 900px) {
+    .bh-card.is-presenting {
+        display: block;
+        overflow-y: auto;
+    }
+    .bh-card.is-presenting .bh-stage { border-right: none; }
+    .bh-card.is-presenting .bh-side { overflow: visible; }
+}
+
+@media (max-width: 600px) {
+    .bh-head-right { width: 100%; justify-content: space-between; flex-direction: row-reverse; }
+    .bh-stage { padding: 0.5rem 0.25rem 0; }
+    .bh-info, .bh-controls { padding-left: 1.1rem; padding-right: 1.1rem; }
+}
