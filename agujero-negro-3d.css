@@ -118,6 +118,7 @@ md-slider {
     position: relative;
     background-color: #000; /* Fondo negro para el espacio */
     cursor: grab;
+    display: flex; /* Fuerza que el hijo tome el espacio */
 }
 
 .bh3d-canvas-area:active {
@@ -125,6 +126,9 @@ md-slider {
 }
 
 #glcanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: block;
