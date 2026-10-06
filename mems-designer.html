@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MicroFab Studio | Generador Vectorial MEMS</title>
+
+  <!-- Google Fonts: Inter & Space Mono (Original Site Identity) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="mems-designer.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <nav class="site-nav">
+    <a href="index.html" class="brand-wrapper">
+      <h1>MicroFab Studio</h1>
+      <span class="brand-badge">MEMS Vector</span>
+    </a>
+
+    <!-- Configuration & View Controls -->
+    <div class="nav-controls">
+      <div class="control-pill">
+        <label for="templateSelect">Plantilla:</label>
+        <select id="templateSelect">
+          <option value="cantilever">Microviga Libre (Cantilever)</option>
+          <option value="pressure_sensor">Sensor de Presión</option>
+          <option value="microfluidics">Canal Microfluídico</option>
+          <option value="biomems">Arreglo BioMEMS</option>
+        </select>
+      </div>
+
+      <div class="control-pill">
+        <label for="gridSizeSelect">Grid Fino:</label>
+        <select id="gridSizeSelect">
+          <option value="20">20 x 20 (5%)</option>
+          <option value="32">32 x 32 (3.1%)</option>
+          <option value="40" selected>40 x 40 (2.5%)</option>
+          <option value="50">50 x 50 (2.0%)</option>
+          <option value="64">64 x 64 (1.5%)</option>
+          <option value="100">100 x 100 (1.0%)</option>
+        </select>
+      </div>
+
+      <!-- View Selector -->
+      <button id="viewIsoBtn" class="btn btn-primary" title="Vista Isométrica 3D">
+        📐 Isométrica 3D
+      </button>
+      <button id="viewCrossBtn" class="btn" title="Corte Transversal 2D">
+        ✂️ Corte 2D
+      </button>
+
+      <!-- Export & Persistence -->
+      <button id="copySvgBtn" class="btn" title="Copiar código SVG al portapapeles">
+        📋 Copiar SVG
+      </button>
+      <button id="exportSvgBtn" class="btn btn-primary" title="Descargar archivo SVG">
+        💾 Exportar SVG
+      </button>
+      <button id="exportPngBtn" class="btn" title="Descargar imagen PNG de alta resolución">
+        🖼️ PNG HD
+      </button>
+      <button id="saveJsonBtn" class="btn btn-icon" title="Guardar Proyecto JSON">
+        📥
+      </button>
+      <label class="btn btn-icon" title="Cargar Proyecto JSON" style="cursor: pointer;">
+        📤
+        <input type="file" id="loadJsonInput" accept=".json" style="display: none;" />
+      </label>
+      <a href="index.html" class="btn" title="Volver al Inicio">
+        Volver
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Workspace -->
+  <main class="studio-container">
+    
+    <!-- Row 1: Dual Interactive View (2D Fine Grid Canvas + 3D Isometric Viewport) -->
+    <div class="workspace-grid">
+      
+      <!-- 2D Fine Grid Drawing Canvas with Draggable Rectangles -->
+      <section class="editor-card">
+        <div class="card-header">
+          <h2>1. Diseño 2D (Rectángulos Arrastrables)</h2>
+          <div class="toolbar-strip">
+            <button id="addRectBtn" class="btn btn-icon" title="Añadir nuevo rectángulo a la capa">+ ⬛</button>
+            <button id="duplicateRectBtn" class="btn btn-icon" title="Duplicar rectángulo seleccionado">📋</button>
+            <button id="deleteRectBtn" class="btn btn-icon" title="Eliminar rectángulo seleccionado">🗑️</button>
+            <button id="fillWaferBtn" class="btn btn-icon" title="Rellenar oblea completa (0..100)">🪣</button>
+            <button id="clearLayerBtn" class="btn btn-icon" title="Limpiar todos los rectángulos de la capa">✕</button>
+            <button id="toggleGhostBtn" class="btn btn-icon active" title="Ver silueta de capas inferiores (Onion skinning)">👻</button>
+          </div>
+        </div>
+
+        <!-- Interactive Canvas Container -->
+        <div class="grid-canvas-container" id="maskGridCanvas">
+          <!-- Dynamically populated 2D Fine Grid & Rectangles -->
+        </div>
+
+        <!-- Rectangle Coordinates Inspector & Slice Bar -->
+        <div class="rect-inspector-bar">
+          <span style="font-weight: 700; color: var(--text-main);">RECTÁNGULO:</span>
+          <div class="coord-group">
+            <label>X:</label>
+            <input type="number" id="rectXInput" class="coord-input" min="0" max="100" />%
+          </div>
+          <div class="coord-group">
+            <label>Y:</label>
+            <input type="number" id="rectYInput" class="coord-input" min="0" max="100" />%
+          </div>
+          <div class="coord-group">
+            <label>Ancho (W):</label>
+            <input type="number" id="rectWInput" class="coord-input" min="1" max="100" />%
+          </div>
+          <div class="coord-group">
+            <label>Alto (H):</label>
+            <input type="number" id="rectHInput" class="coord-input" min="1" max="100" />%
+          </div>
+        </div>
+
+        <!-- Cross-Section Slice Selector -->
+        <div class="form-row" style="padding: 0 0.5rem;">
+          <label for="sliceYSlider">Fila de Corte 2D (Y):</label>
+          <input type="range" id="sliceYSlider" min="0" max="100" value="50" step="1" />
+          <span id="sliceYValue" style="font-family: var(--font-mono); font-weight: 700;">50%</span>
+        </div>
+      </section>
+
+      <!-- Real-time 3D Isometric SVG Viewport -->
+      <section class="editor-card">
+        <div class="card-header">
+          <h2>2. Vista Isométrica 3D (SVG Puro)</h2>
+          <div class="toolbar-strip">
+            <div class="control-pill">
+              <label for="cutawaySelect">Corte 3D:</label>
+              <select id="cutawaySelect">
+                <option value="none">Sin Corte</option>
+                <option value="front_half">Corte Frontal 1/2</option>
+                <option value="front_quarter">Corte Cuadrante 1/4</option>
+              </select>
+            </div>
+            <button id="toggleHatchBtn" class="btn btn-icon active" title="Alternar tramas académicas de materiales">▦</button>
+          </div>
+        </div>
+
+        <!-- SVG Output Viewport -->
+        <div class="viewport-3d-container" id="svgViewport">
+          <!-- Real-time 3D Isometric SVG -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Row 2: Layer Stack Manager (Capa por Capa) -->
+    <section class="layer-manager-section">
+      <div class="card-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <h2>3. Apilamiento de Capas (Stack)</h2>
+          <input type="text" id="projectTitleInput" class="layer-name-edit" style="width: auto; font-family: var(--font-mono); font-size: 0.8rem; border-bottom: 1px solid #cccccc;" value="Microviga Libre (Cantilever de Polisilicio)" />
+        </div>
+        <button id="addLayerBtn" class="btn btn-primary">+ Añadir Capa</button>
+      </div>
+
+      <div class="layers-horizontal-stack" id="layersListContainer">
+        <!-- Dynamically rendered layer cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="memsToast" class="mems-toast">Notificación</div>
+
+  <!-- Scripts -->
+  <script src="js/mems-materials.js"></script>
+  <script src="js/mems-engine.js"></script>
+  <script src="js/mems-app.js"></script>
+</body>
+</html>
