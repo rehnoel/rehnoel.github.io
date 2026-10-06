@@ -56,20 +56,7 @@
                     </div>
                     <md-slider id="sl-density" min="0.0" max="2.0" step="0.1" value="1.0" aria-label="Densidad"></md-slider>
                 </div>
-                <div class="bh3d-control-group">
-                    <div class="bh3d-control-header">
-                        <span>VELOCIDAD DEL TIEMPO</span>
-                        <span class="bh3d-control-value" id="val-speed">Normal</span>
-                    </div>
-                    <md-slider id="sl-speed" min="0.0" max="3.0" step="0.1" value="1.0" aria-label="Velocidad"></md-slider>
-                </div>
-                <div class="bh3d-control-group">
-                    <div class="bh3d-control-header">
-                        <span>TEMPERATURA (COLOR)</span>
-                        <span class="bh3d-control-value" id="val-color">Estelar</span>
-                    </div>
-                    <md-slider id="sl-color" min="0.0" max="1.0" step="0.05" value="0.5" aria-label="Color"></md-slider>
-                </div>
+                
                 <div class="bh3d-switch-row" style="border-top: 1px solid var(--border-color);">
                     <div>
                         <div class="bh3d-switch-label">LENTE GRAVITACIONAL</div>
@@ -134,8 +121,6 @@
             uniform vec3 u_cameraRight;
             uniform float u_fov;
             uniform float u_density;
-            uniform float u_speed;
-            uniform float u_colorT;
             uniform float u_lensing;
             uniform float u_doppler;
 
@@ -164,38 +149,30 @@
                 for (int i = 0; i < 4; i++) {
                     f += w * noise(p);
                     p *= 2.0;
-                    w *= 0.4; // Ajustado para hacer el gas menos caótico y más fluido
+                    w *= 0.4;
                 }
                 return f;
             }
 
-            // Nueva función de densidad mucho más atractiva y realista
             float getDiskDensity(vec3 p) {
                 float r = length(p.xz);
                 
-                // Límites de existencia del disco
                 if(r < 2.6 || r > 12.0) return 0.0;
                 
-                // Grosor exponencial (denso en el centro, difuso a los lados)
                 float h = abs(p.y);
                 float scaleH = exp(-h * 5.0);
                 if(scaleH < 0.01) return 0.0;
                 
-                // Velocidad diferencial Kepleriana (Gira más rápido cerca del horizonte)
-                float angularSpeed = u_speed * 6.0 / pow(max(r, 0.1), 1.5);
+                // Velocidad diferencial baja (Agujero Supermasivo)
+                float angularSpeed = 0.08 * 6.0 / pow(max(r, 0.1), 1.5);
                 vec3 pRot = p;
                 pRot.xz *= rot(-u_time * angularSpeed);
                 
-                // Patrón estriado (anillos concéntricos de materia)
                 float rings = sin(r * 15.0 + fbm(pRot * 2.0) * 5.0);
                 rings = smoothstep(-0.2, 1.0, rings);
                 
-                // Ruido volumétrico para darle textura de nubes de plasma
                 float clouds = fbm(pRot * 3.0);
-                
                 float density = rings * clouds * scaleH;
-                
-                // Difuminar suavemente los bordes interno y externo
                 float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(12.0, 8.0, r);
                 
                 return density * fadeR * u_density * 4.0;
@@ -213,50 +190,33 @@
                 vec3 col = vec3(0.0);
                 float transmittance = 1.0;
                 
-                // Paleta de colores cinematográfica
-                vec3 hot = vec3(1.0, 0.8, 0.5); 
-                vec3 cold = vec3(0.8, 0.1, 0.0);
+                // Paleta de colores cálidos y fijos
+                vec3 hot = vec3(1.0, 0.5, 0.1); // Naranja brillante
+                vec3 cold = vec3(0.4, 0.05, 0.0); // Rojo oscuro
                 
-                if(u_colorT > 0.5) {
-                    float t = (u_colorT - 0.5) * 2.0;
-                    hot = mix(hot, vec3(0.4, 0.8, 1.0), t); // Transición a Cian / Blanco
-                    cold = mix(cold, vec3(0.0, 0.2, 0.6), t); // Transición a Azul oscuro
-                } else {
-                    float t = u_colorT * 2.0;
-                    hot = mix(vec3(1.0, 0.3, 0.0), hot, t); // Transición a Naranja puro
-                    cold = mix(vec3(0.2, 0.0, 0.0), cold, t); // Transición a Rojo oscuro
-                }
-                
-                // Parámetros de calidad aumentados
                 float dt = 0.06;
                 const int MAX_STEPS = 250;
-                float distMarched = 0.0;
                 
                 for(int i = 0; i < MAX_STEPS; i++) {
                     float r2 = dot(rayPos, rayPos);
                     float r = sqrt(r2);
                     
-                    // Horizonte de eventos afilado
                     if(r < 2.2) {
                         transmittance = 0.0;
                         break;
                     }
                     
-                    // Lente Gravitacional matemáticamente más cercana a Schwarzschild
                     if(u_lensing > 0.5) {
                         vec3 force = -rayPos / (r2 * r);
                         rayDir = normalize(rayDir + force * 2.5 * dt);
                     }
                     
-                    // Muestreo del disco brillante
                     if(abs(rayPos.y) < 2.0 && r < 14.0) {
                         float d = getDiskDensity(rayPos);
                         if(d > 0.0) {
-                            // La temperatura (y el color) decae al alejarnos del centro
                             float temp = smoothstep(12.0, 2.6, r);
                             vec3 localColor = mix(cold, hot, temp);
                             
-                            // Beaming Relativista (Efecto Doppler)
                             if (u_doppler > 0.5) {
                                 vec3 velDir = normalize(vec3(-rayPos.z, 0.0, rayPos.x));
                                 float doppler = dot(rayDir, velDir); 
@@ -264,31 +224,35 @@
                                 localColor *= pow(boost, 3.5); 
                             }
 
-                            // Alta emisión para que brille intensamente
                             float emission = d * 1.8;
                             col += localColor * emission * transmittance * dt;
                             transmittance *= exp(-d * dt * 0.4);
                         }
                     }
                     
-                    // Ajuste de paso dinámico: más grande lejos para no desperdiciar iteraciones
-                    float stepSize = dt * min(1.5, max(0.5, r * 0.3));
-                    rayPos += rayDir * stepSize;
-                    distMarched += stepSize;
+                    // SOLUCIÓN AL BUG DEL ZOOM: 
+                    // Si estamos muy lejos del agujero negro (> 15.0 unidades), damos un salto gigante 
+                    // en el espacio vacío en lugar de malgastar iteraciones.
+                    float stepSize;
+                    if (r > 15.0) {
+                        stepSize = r - 14.5; // Salto directo al borde del disco
+                    } else {
+                        stepSize = dt * min(1.5, max(0.5, r * 0.3));
+                    }
                     
-                    // CORRECCIÓN: Usamos la distancia viajada en lugar de 'r' para no cortar el disco al alejar el zoom de la cámara
-                    if(distMarched > 70.0 || transmittance < 0.01) break;
+                    rayPos += rayDir * stepSize;
+                    
+                    // Condición de salida por escape hacia el infinito
+                    if(r > 70.0 || transmittance < 0.01) break;
                 }
                 
-                // Estrellas afectadas por el campo gravitatorio
                 if(transmittance > 0.01) {
                     float starNoise = noise(rayDir * 200.0);
                     float stars = pow(max(0.0, starNoise - 0.75) * 4.0, 5.0);
                     col += vec3(stars) * transmittance;
                 }
 
-                // ACES-like HDR Tonemapping para un look fotorrealista/cinematográfico
-                col = col * 1.5; // Ajuste de exposición
+                col = col * 1.5; 
                 col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
 
                 gl_FragColor = vec4(col, 1.0);
@@ -301,10 +265,6 @@
             canvas: document.getElementById('glcanvas'),
             density: document.getElementById('sl-density'),
             valDensity: document.getElementById('val-density'),
-            speed: document.getElementById('sl-speed'),
-            valSpeed: document.getElementById('val-speed'),
-            color: document.getElementById('sl-color'),
-            valColor: document.getElementById('val-color'),
             lensing: document.getElementById('sw-lensing'),
             doppler: document.getElementById('sw-doppler')
         };
@@ -316,7 +276,7 @@
 
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-                camera.position.set(0, 3, 15); // Empezar un poco más lejos
+                camera.position.set(0, 3, 15); 
 
                 orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 
@@ -329,8 +289,8 @@
                 controls.dampingFactor = 0.05;
                 controls.enablePan = false;
                 controls.minDistance = 6;
-                // Permitimos alejar la cámara mucho más ahora que el disco ya no desaparece
-                controls.maxDistance = 40; 
+                // Distancia ampliada. ¡Ahora puedes alejarte con seguridad!
+                controls.maxDistance = 50; 
 
                 const geometry = new THREE.PlaneGeometry(2, 2);
                 material = new THREE.ShaderMaterial({
@@ -345,8 +305,6 @@
                         u_cameraRight: { value: new THREE.Vector3() },
                         u_fov: { value: camera.fov },
                         u_density: { value: 1.0 },
-                        u_speed: { value: 1.0 },
-                        u_colorT: { value: 0.5 },
                         u_lensing: { value: 1.0 },
                         u_doppler: { value: 1.0 }
                     },
@@ -361,7 +319,6 @@
 
                 animate(0);
                 
-                // Ocultar hint de carga
                 setTimeout(() => {
                     const h = document.getElementById('hint-drag');
                     if(h) h.style.display = 'none';
@@ -381,12 +338,9 @@
 
             if(DOM.density) DOM.density.addEventListener('input', (e) => {
                 material.uniforms.u_density.value = safeRead(e.target, 1.0);
-            });
-            if(DOM.speed) DOM.speed.addEventListener('input', (e) => {
-                material.uniforms.u_speed.value = safeRead(e.target, 1.0);
-            });
-            if(DOM.color) DOM.color.addEventListener('input', (e) => {
-                material.uniforms.u_colorT.value = safeRead(e.target, 0.5);
+                const val = safeRead(e.target, 1.0);
+                const labels = ["Gaseoso", "Ligero", "Normal", "Denso", "Opaco"];
+                DOM.valDensity.textContent = labels[Math.floor((val / 2.0) * 4)] || "Opaco";
             });
             if(DOM.lensing) DOM.lensing.addEventListener('change', (e) => {
                 material.uniforms.u_lensing.value = e.target.selected ? 1.0 : 0.0;
