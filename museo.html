@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo | Leonardo N. Hernandez</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Material Web Components -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+    </script>
+</head>
+<body>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html" class="nav-link">Inicio</a></li>
+            <li><a href="cv.html" class="nav-link">CV / Portafolio</a></li>
+            <li><a href="blog.html" class="nav-link">Blog</a></li>
+            <li><a href="museo.html" class="nav-link active">Museo</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Museo</h1>
+        <h2>Mediación y Herramientas Visuales</h2>
+    </header>
+
+    <div class="container">
+        <!-- SECCIÓN MUSEO -->
+        <div id="museo-section" class="content-section active">
+            <section>
+                <h3 class="section-title">Interactivos de Astronomía</h3>
+
+                <!-- Artículo interactivo: Agujero Negro 3D -->
+                <article class="card">
+                    <h4><a href="agujero-negro-3d.html">Simulador 3D: Lente Gravitacional y Agujero Negro</a></h4>
+                    <div class="blog-post-meta">
+                        <span>Mediación Museográfica</span> &bull; 6 de Octubre, 2026
+                    </div>
+                    <p>Un simulador avanzado renderizado en tiempo real utilizando <em>Raymarching</em> y matemáticas directamente en el navegador. Observa cómo la inmensa fuerza de gravedad dobla el camino de la luz, creando la ilusión óptica del anillo luminoso y el efecto doppler en el plasma giratorio. Ideal para explicaciones inmersivas a pantalla completa.</p>
+                    <md-outlined-button href="agujero-negro-3d.html">Abrir simulación 3D</md-outlined-button>
+                </article>
+
+                <!-- Artículo interactivo: Agujero Negro 2D Diagrama -->
+                <article class="card">
+                    <h4><a href="agujero-negro.html">Anatomía de un Agujero Negro</a></h4>
+                    <div class="blog-post-meta">
+                        <span>Mediación Museográfica</span> &bull; 6 de Octubre, 2026
+                    </div>
+                    <p>Un visualizador interactivo diseñado para detallar los componentes físicos. Explora el horizonte de eventos, la ergosfera y la esfera de fotones, y visualiza cómo se modifican sus tamaños según la masa y la rotación del objeto celeste.</p>
+                    <md-outlined-button href="agujero-negro.html">Abrir diagrama interactivo</md-outlined-button>
+                </article>
+
+            </section>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Leonardo Nicolas Hernandez. Construido con ✨, HTML y CSS puro.</p>
+    </footer>
+</body>
+</html>

@@ -39,10 +39,17 @@
     <!-- Contenedor a pantalla completa -->
     <div id="canvas-container" style="position: relative; width: 100vw; height: 100vh; overflow: hidden;">
         
-        <!-- Interfaz superpuesta limpia -->
+        <!-- Interfaz superpuesta limpia (Izquierda) -->
         <div style="position: absolute; top: 2rem; left: 2rem; z-index: 100; pointer-events: none;">
-            <a href="agujero-negro.html" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: opacity 0.2s;">&larr; Regresar atrás</a>
+            <a href="museo.html" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: opacity 0.2s;">&larr; Regresar al Museo</a>
             <h1 style="margin: 0; color: #f4f4f4; font-family: var(--font-sans, 'Inter', sans-serif); font-size: 2rem; font-weight: 600; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,1.0);">Simulación de Agujero Negro</h1>
+        </div>
+
+        <!-- Interfaz superpuesta (Derecha) -->
+        <div style="position: absolute; top: 2rem; right: 2rem; z-index: 100; pointer-events: none;">
+            <a href="#" id="btn-fullscreen" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; padding: 0.5rem 1rem; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 4px; background: rgba(0,0,0,0.4); text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: all 0.2s;">
+                [ ] Pantalla Completa
+            </a>
         </div>
 
         <canvas id="glcanvas"></canvas>
@@ -273,6 +280,27 @@
                     const h = document.getElementById('hint-drag');
                     if(h) h.style.display = 'none';
                 }, 5000);
+
+                // Fullscreen logic
+                const btnFs = document.getElementById('btn-fullscreen');
+                if (btnFs) {
+                    btnFs.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (!document.fullscreenElement) {
+                            document.documentElement.requestFullscreen().catch(err => {
+                                console.log(err.message);
+                            });
+                        } else {
+                            document.exitFullscreen();
+                        }
+                    });
+                }
+                
+                document.addEventListener('fullscreenchange', () => {
+                    if (btnFs) {
+                        btnFs.innerHTML = document.fullscreenElement ? "[x] Salir de Pantalla" : "[ ] Pantalla Completa";
+                    }
+                });
 
             } catch(e) {
                 window.onerror(e.message, 'internal', 0);
