@@ -30,7 +30,7 @@
 </head>
 <body class="bh3d-body">
 
-    <!-- Visor de errores (Oculto por defecto) -->
+    <!-- Visor de errores -->
     <div id="error-overlay" style="display:none; position:absolute; z-index:99999; background:#900; color:#fff; padding:2rem; top:0; left:0; width:100%; height:100%; overflow:auto; font-family:monospace;">
         <h2>Error Crítico</h2>
         <div id="error-log"></div>
@@ -41,7 +41,7 @@
         <aside class="bh3d-sidebar">
             <header class="bh3d-header">
                 <h1>Simulación 3D Realista</h1>
-                <p>Usa tu dedo o el ratón en la imagen para orbitar alrededor del agujero negro. Observa cómo su gravedad dobla la luz del disco.</p>
+                <p>Usa tu dedo o el ratón en la imagen para orbitar alrededor del agujero negro. Observa cómo su inmensa gravedad dobla la luz del disco.</p>
                 <div style="margin-top: 1rem;">
                     <a href="agujero-negro.html" style="font-family: var(--font-mono); font-size: 0.8rem;">&larr; Volver al diagrama anatómico</a>
                 </div>
@@ -51,7 +51,7 @@
                 <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-top: 0.5rem;">
                     En esta simulación, los efectos de la <strong>Relatividad General</strong> de Einstein (Lente Gravitacional) y de la <strong>Relatividad Especial</strong> (Efecto Doppler) se calculan matemáticamente en tiempo real en la tarjeta gráfica.
                     <br><br>
-                    El disco de gas súper caliente gira a enormes velocidades. Debido a la dilatación del tiempo y el beaming relativista, la luz que avanza hacia el observador se comprime, viéndose mucho más brillante y concentrada que la luz que se aleja.
+                    El disco de gas súper caliente gira a enormes velocidades. Debido a la dilatación del tiempo y el beaming relativista, la luz que avanza hacia el observador se comprime, viéndose más brillante y concentrada que la luz que se aleja.
                 </p>
             </div>
         </aside>
@@ -76,7 +76,6 @@
 
     <!-- Script Inline para evitar bloqueos CORS locales -->
     <script type="module">
-        // Atrapamos errores para verlos en pantalla si algo falla localmente
         window.onerror = function(msg, url, line) {
             const errDiv = document.getElementById('error-overlay');
             errDiv.style.display = 'block';
@@ -136,14 +135,13 @@
             float getDiskDensity(vec3 p) {
                 float r = length(p.xz);
                 
-                // TAMAÑO AUMENTADO: disco se extiende hasta 16.0 (antes 12.0)
-                if(r < 2.6 || r > 16.0) return 0.0;
+                if(r < 2.6 || r > 12.0) return 0.0;
                 
                 float h = abs(p.y);
                 float scaleH = exp(-h * 5.0);
                 if(scaleH < 0.01) return 0.0;
                 
-                // Velocidad baja para agujero supermasivo
+                // Velocidad diferencial baja (Agujero Supermasivo)
                 float angularSpeed = 0.08 * 6.0 / pow(max(r, 0.1), 1.5);
                 vec3 pRot = p;
                 pRot.xz *= rot(-u_time * angularSpeed);
@@ -153,11 +151,8 @@
                 
                 float clouds = fbm(pRot * 3.0);
                 float density = rings * clouds * scaleH;
+                float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(12.0, 8.0, r);
                 
-                // Desvanecimiento suave ajustado al nuevo límite exterior (16.0)
-                float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(16.0, 11.0, r);
-                
-                // Densidad fija
                 return density * fadeR * 4.0;
             }
 
@@ -173,7 +168,7 @@
                 vec3 col = vec3(0.0);
                 float transmittance = 1.0;
                 
-                // Tonos cálidos (fijos)
+                // Paleta de colores cálidos y fijos
                 vec3 hot = vec3(1.0, 0.5, 0.1); // Naranja brillante
                 vec3 cold = vec3(0.4, 0.05, 0.0); // Rojo oscuro
                 
@@ -189,19 +184,17 @@
                         break;
                     }
                     
-                    // Lente Gravitacional (siempre encendida)
+                    // Lente Gravitacional
                     vec3 force = -rayPos / (r2 * r);
                     rayDir = normalize(rayDir + force * 2.5 * dt);
                     
-                    // Quitamos límite de rayPos.y para evitar cortes rectos en los arcos de luz,
-                    // y ampliamos a r < 20.0 para abarcar por completo el nuevo disco de radio 16.0
-                    if(r < 20.0) {
+                    if(abs(rayPos.y) < 2.0 && r < 14.0) {
                         float d = getDiskDensity(rayPos);
                         if(d > 0.0) {
-                            float temp = smoothstep(16.0, 2.6, r);
+                            float temp = smoothstep(12.0, 2.6, r);
                             vec3 localColor = mix(cold, hot, temp);
                             
-                            // Efecto Doppler (siempre encendido)
+                            // Efecto Doppler
                             vec3 velDir = normalize(vec3(-rayPos.z, 0.0, rayPos.x));
                             float doppler = dot(rayDir, velDir); 
                             float boost = max(0.0, 1.0 + doppler * 0.75); 
@@ -213,18 +206,20 @@
                         }
                     }
                     
-                    // Optimización de espacio vacío: 
-                    // Ajustada a > 19.0 para no saltar por error dentro del nuevo disco
+                    // SOLUCIÓN AL BUG DEL ZOOM: 
+                    // Si estamos muy lejos del agujero negro (> 15.0 unidades), damos un salto gigante 
+                    // en el espacio vacío en lugar de malgastar iteraciones.
                     float stepSize;
-                    if (r > 19.0) {
-                        stepSize = r - 18.5; 
+                    if (r > 15.0) {
+                        stepSize = r - 14.5; // Salto directo al borde del disco
                     } else {
                         stepSize = dt * min(1.5, max(0.5, r * 0.3));
                     }
                     
                     rayPos += rayDir * stepSize;
                     
-                    if(r > 80.0 || transmittance < 0.01) break;
+                    // Condición de salida por escape hacia el infinito
+                    if(r > 70.0 || transmittance < 0.01) break;
                 }
                 
                 if(transmittance > 0.01) {
@@ -253,7 +248,7 @@
 
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-                camera.position.set(0, 4, 18); // Cámara inicial ligeramente elevada
+                camera.position.set(0, 3, 15); 
 
                 orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 
@@ -266,7 +261,7 @@
                 controls.dampingFactor = 0.05;
                 controls.enablePan = false;
                 controls.minDistance = 6;
-                controls.maxDistance = 60; // Zoom out seguro
+                controls.maxDistance = 50; 
 
                 const geometry = new THREE.PlaneGeometry(2, 2);
                 material = new THREE.ShaderMaterial({
