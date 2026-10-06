@@ -164,28 +164,41 @@
                 for (int i = 0; i < 4; i++) {
                     f += w * noise(p);
                     p *= 2.0;
-                    w *= 0.5;
+                    w *= 0.4; // Ajustado para hacer el gas menos caótico y más fluido
                 }
                 return f;
             }
 
+            // Nueva función de densidad mucho más atractiva y realista
             float getDiskDensity(vec3 p) {
                 float r = length(p.xz);
-                if(r < 2.5 || r > 9.0) return 0.0;
                 
+                // Límites de existencia del disco
+                if(r < 2.6 || r > 12.0) return 0.0;
+                
+                // Grosor exponencial (denso en el centro, difuso a los lados)
                 float h = abs(p.y);
-                float maxH = 0.1 + 0.05 * r;
-                if(h > maxH) return 0.0;
+                float scaleH = exp(-h * 5.0);
+                if(scaleH < 0.01) return 0.0;
                 
-                float angularSpeed = u_speed * 3.0 / pow(max(r, 0.1), 1.5);
+                // Velocidad diferencial Kepleriana (Gira más rápido cerca del horizonte)
+                float angularSpeed = u_speed * 6.0 / pow(max(r, 0.1), 1.5);
                 vec3 pRot = p;
                 pRot.xz *= rot(-u_time * angularSpeed);
                 
-                float n = fbm(pRot * 2.0);
-                float fadeR = smoothstep(2.5, 3.5, r) * smoothstep(9.0, 7.0, r);
-                float fadeH = smoothstep(maxH, 0.0, h);
+                // Patrón estriado (anillos concéntricos de materia)
+                float rings = sin(r * 15.0 + fbm(pRot * 2.0) * 5.0);
+                rings = smoothstep(-0.2, 1.0, rings);
                 
-                return n * fadeR * fadeH * u_density * 3.0;
+                // Ruido volumétrico para darle textura de nubes de plasma
+                float clouds = fbm(pRot * 3.0);
+                
+                float density = rings * clouds * scaleH;
+                
+                // Difuminar suavemente los bordes interno y externo
+                float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(12.0, 8.0, r);
+                
+                return density * fadeR * u_density * 4.0;
             }
 
             void main() {
@@ -199,58 +212,84 @@
 
                 vec3 col = vec3(0.0);
                 float transmittance = 1.0;
-                float mass = 1.0;
                 
-                vec3 colorInner = mix(vec3(1.0, 0.3, 0.0), vec3(0.0, 0.8, 1.0), u_colorT);
-                vec3 colorOuter = mix(vec3(0.8, 0.1, 0.0), vec3(0.0, 0.3, 0.8), u_colorT);
+                // Paleta de colores cinematográfica
+                vec3 hot = vec3(1.0, 0.8, 0.5); 
+                vec3 cold = vec3(0.8, 0.1, 0.0);
                 
-                float dt = 0.15;
-                const int MAX_STEPS = 120;
+                if(u_colorT > 0.5) {
+                    float t = (u_colorT - 0.5) * 2.0;
+                    hot = mix(hot, vec3(0.4, 0.8, 1.0), t); // Transición a Cian / Blanco
+                    cold = mix(cold, vec3(0.0, 0.2, 0.6), t); // Transición a Azul oscuro
+                } else {
+                    float t = u_colorT * 2.0;
+                    hot = mix(vec3(1.0, 0.3, 0.0), hot, t); // Transición a Naranja puro
+                    cold = mix(vec3(0.2, 0.0, 0.0), cold, t); // Transición a Rojo oscuro
+                }
+                
+                // Parámetros de calidad aumentados
+                float dt = 0.06;
+                const int MAX_STEPS = 250;
+                float distMarched = 0.0;
                 
                 for(int i = 0; i < MAX_STEPS; i++) {
                     float r2 = dot(rayPos, rayPos);
                     float r = sqrt(r2);
                     
-                    if(r < 2.0) {
+                    // Horizonte de eventos afilado
+                    if(r < 2.2) {
                         transmittance = 0.0;
                         break;
                     }
                     
+                    // Lente Gravitacional matemáticamente más cercana a Schwarzschild
                     if(u_lensing > 0.5) {
-                        vec3 g = -rayPos * (mass * 3.0 / (r2 * r * max(r, 0.1)));
-                        rayDir = normalize(rayDir + g * dt);
+                        vec3 force = -rayPos / (r2 * r);
+                        rayDir = normalize(rayDir + force * 2.5 * dt);
                     }
                     
-                    if(abs(rayPos.y) < 1.0 && r < 10.0) {
+                    // Muestreo del disco brillante
+                    if(abs(rayPos.y) < 2.0 && r < 14.0) {
                         float d = getDiskDensity(rayPos);
                         if(d > 0.0) {
-                            vec3 localColor = mix(colorInner, colorOuter, smoothstep(2.5, 9.0, r));
+                            // La temperatura (y el color) decae al alejarnos del centro
+                            float temp = smoothstep(12.0, 2.6, r);
+                            vec3 localColor = mix(cold, hot, temp);
+                            
+                            // Beaming Relativista (Efecto Doppler)
                             if (u_doppler > 0.5) {
                                 vec3 velDir = normalize(vec3(-rayPos.z, 0.0, rayPos.x));
                                 float doppler = dot(rayDir, velDir); 
-                                float boost = max(0.0, 1.0 + doppler * 0.8); 
-                                localColor *= pow(boost, 3.0); 
+                                float boost = max(0.0, 1.0 + doppler * 0.75); 
+                                localColor *= pow(boost, 3.5); 
                             }
-                            float emission = d * 0.8;
+
+                            // Alta emisión para que brille intensamente
+                            float emission = d * 1.8;
                             col += localColor * emission * transmittance * dt;
-                            transmittance *= exp(-d * dt * 0.2);
+                            transmittance *= exp(-d * dt * 0.4);
                         }
                     }
                     
-                    float stepSize = dt * min(1.0, r * 0.2);
+                    // Ajuste de paso dinámico: más grande lejos para no desperdiciar iteraciones
+                    float stepSize = dt * min(1.5, max(0.5, r * 0.3));
                     rayPos += rayDir * stepSize;
-                    if(r > 25.0 || transmittance < 0.01) break;
+                    distMarched += stepSize;
+                    
+                    // CORRECCIÓN: Usamos la distancia viajada en lugar de 'r' para no cortar el disco al alejar el zoom de la cámara
+                    if(distMarched > 70.0 || transmittance < 0.01) break;
                 }
                 
+                // Estrellas afectadas por el campo gravitatorio
                 if(transmittance > 0.01) {
-                    float starNoise = noise(rayDir * 150.0);
-                    float stars = pow(max(0.0, starNoise - 0.7) * 3.3, 4.0);
+                    float starNoise = noise(rayDir * 200.0);
+                    float stars = pow(max(0.0, starNoise - 0.75) * 4.0, 5.0);
                     col += vec3(stars) * transmittance;
                 }
 
-                // Corrección para evitar bug en strict WebGL (vec3 + float -> error)
-                col = col / (vec3(1.0) + col);
-                col = pow(col, vec3(1.0 / 2.2));
+                // ACES-like HDR Tonemapping para un look fotorrealista/cinematográfico
+                col = col * 1.5; // Ajuste de exposición
+                col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
 
                 gl_FragColor = vec4(col, 1.0);
             }
@@ -277,7 +316,7 @@
 
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-                camera.position.set(0, 3, 12); 
+                camera.position.set(0, 3, 15); // Empezar un poco más lejos
 
                 orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 
@@ -290,7 +329,8 @@
                 controls.dampingFactor = 0.05;
                 controls.enablePan = false;
                 controls.minDistance = 6;
-                controls.maxDistance = 20;
+                // Permitimos alejar la cámara mucho más ahora que el disco ya no desaparece
+                controls.maxDistance = 40; 
 
                 const geometry = new THREE.PlaneGeometry(2, 2);
                 material = new THREE.ShaderMaterial({
