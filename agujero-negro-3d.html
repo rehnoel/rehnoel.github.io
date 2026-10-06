@@ -194,11 +194,11 @@
                             float temp = smoothstep(12.0, 2.6, r);
                             vec3 localColor = mix(cold, hot, temp);
                             
-                            // Efecto Doppler
+                            // Efecto Doppler (Intensidad disminuida)
                             vec3 velDir = normalize(vec3(-rayPos.z, 0.0, rayPos.x));
                             float doppler = dot(rayDir, velDir); 
-                            float boost = max(0.0, 1.0 + doppler * 0.75); 
-                            localColor *= pow(boost, 3.5); 
+                            float boost = max(0.0, 1.0 + doppler * 0.45); 
+                            localColor *= pow(boost, 2.0); 
 
                             float emission = d * 1.8;
                             col += localColor * emission * transmittance * dt;
