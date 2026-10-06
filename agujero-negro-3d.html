@@ -41,9 +41,9 @@
         <aside class="bh3d-sidebar">
             <header class="bh3d-header">
                 <h1>Simulación 3D Realista</h1>
-                <p>Usa tu dedo o el ratón en la imagen para orbitar alrededor del agujero negro. Observa cómo su gravedad dobla la luz del disco.</p>
+                <p>Usa tu dedo o el ratón en la imagen para orbitar alrededor del agujero negro. Observa cómo su inmensa gravedad dobla la luz del disco.</p>
                 <div style="margin-top: 1rem;">
-                    <a href="agujero-negro.html" style="font-family: var(--font-mono); font-size: 0.8rem;">&larr; Volver al diagrama</a>
+                    <a href="agujero-negro.html" style="font-family: var(--font-mono); font-size: 0.8rem;">&larr; Volver al diagrama anatómico</a>
                 </div>
             </header>
 
@@ -54,21 +54,9 @@
                         <span class="bh3d-control-value" id="val-size">Normal</span>
                     </div>
                     <md-slider id="sl-size" min="0.0" max="2.0" step="0.1" value="1.0" aria-label="Tamaño"></md-slider>
-                </div>
-                
-                <div class="bh3d-switch-row" style="border-top: 1px solid var(--border-color);">
-                    <div>
-                        <div class="bh3d-switch-label">LENTE GRAVITACIONAL</div>
-                        <div class="bh3d-switch-desc">Curvatura del espacio-tiempo</div>
-                    </div>
-                    <md-switch id="sw-lensing" selected></md-switch>
-                </div>
-                <div class="bh3d-switch-row">
-                    <div>
-                        <div class="bh3d-switch-label">EFECTO DOPPLER</div>
-                        <div class="bh3d-switch-desc">Luz concentrada por el giro</div>
-                    </div>
-                    <md-switch id="sw-doppler" selected></md-switch>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
+                        En esta simulación, los efectos de la Relatividad General de Einstein (Lente Gravitacional) y de la Relatividad Especial (Efecto Doppler) se calculan en tiempo real en la tarjeta gráfica.
+                    </p>
                 </div>
             </div>
         </aside>
@@ -119,8 +107,6 @@
             uniform vec3 u_cameraRight;
             uniform float u_fov;
             uniform float u_size;
-            uniform float u_lensing;
-            uniform float u_doppler;
 
             varying vec2 vUv;
 
@@ -154,8 +140,6 @@
 
             float getDiskDensity(vec3 p) {
                 float r = length(p.xz);
-                
-                // Calculamos el radio máximo dinámicamente según el deslizador de Tamaño
                 float maxR = 6.0 + u_size * 5.0; // Rango de 6.0 a 16.0
                 
                 if(r < 2.6 || r > maxR) return 0.0;
@@ -174,10 +158,8 @@
                 float clouds = fbm(pRot * 3.0);
                 float density = rings * clouds * scaleH;
                 
-                // Difuminado proporcional al tamaño máximo para que los bordes se vean suaves
                 float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(maxR, maxR * 0.75, r);
                 
-                // Densidad general constante
                 return density * fadeR * 4.0;
             }
 
@@ -208,40 +190,42 @@
                         break;
                     }
                     
-                    if(u_lensing > 0.5) {
-                        vec3 force = -rayPos / (r2 * r);
-                        rayDir = normalize(rayDir + force * 2.5 * dt);
-                    }
+                    // Lente Gravitacional (siempre activa)
+                    vec3 force = -rayPos / (r2 * r);
+                    rayDir = normalize(rayDir + force * 2.5 * dt);
                     
-                    if(abs(rayPos.y) < 2.0 && r < 18.0) {
-                        float d = getDiskDensity(rayPos);
-                        if(d > 0.0) {
-                            float temp = smoothstep(12.0, 2.6, r);
-                            vec3 localColor = mix(cold, hot, temp);
-                            
-                            if (u_doppler > 0.5) {
-                                vec3 velDir = normalize(vec3(-rayPos.z, 0.0, rayPos.x));
-                                float doppler = dot(rayDir, velDir); 
-                                float boost = max(0.0, 1.0 + doppler * 0.75); 
-                                localColor *= pow(boost, 3.5); 
-                            }
+                    // Ya no filtramos verticalmente con abs(rayPos.y) < 2.0 
+                    // porque eso causaba el corte brusco (línea recta) en rayos fuertemente curvados
+                    float d = getDiskDensity(rayPos);
+                    if(d > 0.0) {
+                        float temp = smoothstep(12.0, 2.6, r);
+                        vec3 localColor = mix(cold, hot, temp);
+                        
+                        // Efecto Doppler (Intensidad disminuida para un look más sereno)
+                        vec3 velDir = normalize(vec3(-rayPos.z, 0.0, rayPos.x));
+                        float doppler = dot(rayDir, velDir); 
+                        float boost = max(0.0, 1.0 + doppler * 0.35); 
+                        localColor *= pow(boost, 1.5); 
 
-                            float emission = d * 1.8;
-                            col += localColor * emission * transmittance * dt;
-                            transmittance *= exp(-d * dt * 0.4);
-                        }
+                        float emission = d * 1.8;
+                        col += localColor * emission * transmittance * dt;
+                        transmittance *= exp(-d * dt * 0.4);
                     }
                     
+                    // CORRECCIÓN PARA EL ZOOM LEJANO
+                    // Elevamos el límite de salto a 30.0 para que los rayos doblados 
+                    // no sean erróneamente considerados "en espacio vacío" y se pierdan.
                     float stepSize;
-                    if (r > 19.0) {
-                        stepSize = r - 18.5; 
+                    if (r > 30.0) {
+                        stepSize = r - 28.0; 
                     } else {
-                        stepSize = dt * min(1.5, max(0.5, r * 0.3));
+                        stepSize = dt * min(2.0, max(0.5, r * 0.2));
                     }
                     
                     rayPos += rayDir * stepSize;
                     
-                    if(r > 70.0 || transmittance < 0.01) break;
+                    // Incrementamos el rango de fuga para acomodar la cámara lejana
+                    if(r > 80.0 || transmittance < 0.01) break;
                 }
                 
                 if(transmittance > 0.01) {
@@ -262,9 +246,7 @@
             container: document.getElementById('canvas-container'),
             canvas: document.getElementById('glcanvas'),
             size: document.getElementById('sl-size'),
-            valSize: document.getElementById('val-size'),
-            lensing: document.getElementById('sw-lensing'),
-            doppler: document.getElementById('sw-doppler')
+            valSize: document.getElementById('val-size')
         };
 
         function init() {
@@ -287,7 +269,7 @@
                 controls.dampingFactor = 0.05;
                 controls.enablePan = false;
                 controls.minDistance = 6;
-                controls.maxDistance = 50; 
+                controls.maxDistance = 60; // Zoom out aún mayor
 
                 const geometry = new THREE.PlaneGeometry(2, 2);
                 material = new THREE.ShaderMaterial({
@@ -301,9 +283,7 @@
                         u_cameraUp: { value: new THREE.Vector3() },
                         u_cameraRight: { value: new THREE.Vector3() },
                         u_fov: { value: camera.fov },
-                        u_size: { value: 1.0 },
-                        u_lensing: { value: 1.0 },
-                        u_doppler: { value: 1.0 }
+                        u_size: { value: 1.0 }
                     },
                     depthWrite: false,
                     depthTest: false
@@ -338,12 +318,6 @@
                 material.uniforms.u_size.value = val;
                 const labels = ["Mínimo", "Pequeño", "Normal", "Grande", "Gigante"];
                 DOM.valSize.textContent = labels[Math.floor((val / 2.0) * 4.0)] || "Gigante";
-            });
-            if(DOM.lensing) DOM.lensing.addEventListener('change', (e) => {
-                material.uniforms.u_lensing.value = e.target.selected ? 1.0 : 0.0;
-            });
-            if(DOM.doppler) DOM.doppler.addEventListener('change', (e) => {
-                material.uniforms.u_doppler.value = e.target.selected ? 1.0 : 0.0;
             });
         }
 
