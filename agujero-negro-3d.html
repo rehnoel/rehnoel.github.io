@@ -5,55 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Visualizador 3D: Agujero Negro | Blog Leonardo N. Hernandez</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    
-    <!-- Estilos -->
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="agujero-negro-3d.css">
 
-    <!-- Material Web Components -->
     <script type="importmap">
       {
         "imports": {
-          "@material/web/": "https://esm.run/@material/web/",
           "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
           "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
         }
       }
     </script>
-    <script type="module">
-      import '@material/web/all.js';
-    </script>
 </head>
 <body style="margin: 0; padding: 0; overflow: hidden; background-color: #000;">
 
-    <!-- Visor de errores -->
     <div id="error-overlay" style="display:none; position:absolute; z-index:99999; background:#900; color:#fff; padding:2rem; top:0; left:0; width:100%; height:100%; overflow:auto; font-family:monospace;">
         <h2>Error Crítico</h2>
         <div id="error-log"></div>
     </div>
 
-    <!-- Contenedor a pantalla completa -->
     <div id="canvas-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;">
-        
-        <!-- Interfaz superpuesta limpia (Izquierda) -->
+
         <div style="position: absolute; top: max(2rem, env(safe-area-inset-top, 2rem)); left: max(2rem, env(safe-area-inset-left, 2rem)); z-index: 100; pointer-events: none;">
-            <a href="museo.html" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: opacity 0.2s;">&larr; Regresar al Museo</a>
+            <a href="museo.html" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">&larr; Regresar al Museo</a>
             <h1 style="margin: 0; color: #f4f4f4; font-family: var(--font-sans, 'Inter', sans-serif); font-size: 2rem; font-weight: 600; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,1.0);">Simulación de Agujero Negro</h1>
         </div>
 
-        <!-- Interfaz superpuesta (Derecha/Abajo) -->
         <div style="position: absolute; bottom: max(2rem, env(safe-area-inset-bottom, 2rem)); right: max(2rem, env(safe-area-inset-right, 2rem)); z-index: 100; pointer-events: none;">
-            <a href="#" id="btn-fullscreen" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; padding: 0.5rem 1rem; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 4px; background: rgba(0,0,0,0.4); text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: all 0.2s;">
+            <a href="#" id="btn-fullscreen" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; padding: 0.5rem 1rem; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 4px; background: rgba(0,0,0,0.4); text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
                 [ ] Pantalla Completa
             </a>
         </div>
 
         <canvas id="glcanvas"></canvas>
-        
+
         <div class="bh3d-overlay-hint" id="hint-drag">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -68,14 +57,20 @@
     </div>
 
     <script type="module">
-        window.onerror = function(msg, url, line) {
-            const errDiv = document.getElementById('error-overlay');
-            errDiv.style.display = 'block';
-            document.getElementById('error-log').innerHTML += "<p>" + msg + " (Línea: " + line + ")</p>";
-        };
+        function showError(msg) {
+            document.getElementById('error-overlay').style.display = 'block';
+            const p = document.createElement('p');
+            p.textContent = msg;
+            document.getElementById('error-log').appendChild(p);
+        }
+        window.onerror = (msg, url, line) => showError(msg + ' (Línea: ' + line + ')');
 
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
         const vertexShader = `
             varying vec2 vUv;
@@ -85,6 +80,7 @@
             }
         `;
 
+        // Unidades GM = 1  ->  rs = 2, esfera de fotones r = 3, ISCO r = 6, sombra b = 3*sqrt(3) ~ 5.2
         const fragmentShader = `
             uniform vec2 u_resolution;
             uniform float u_time;
@@ -93,235 +89,291 @@
             uniform vec3 u_cameraUp;
             uniform vec3 u_cameraRight;
             uniform float u_fov;
+            uniform float u_doppler;
 
             varying vec2 vUv;
 
-            mat2 rot(float a) {
-                float s = sin(a), c = cos(a);
-                return mat2(c, -s, s, c);
+            const float RS = 2.0;
+            const float R_ISCO = 6.0;
+            const float R_OUT = 22.0;
+            const int MAX_STEPS = 320;
+
+            // Hash sin seno (estable en GPUs móviles)
+            float hash13(vec3 p3) {
+                p3 = fract(p3 * 0.1031);
+                p3 += dot(p3, p3.zyx + 31.32);
+                return fract((p3.x + p3.y) * p3.z);
             }
 
-            float hash(float n) { return fract(sin(n) * 43758.5453123); }
-            float noise(vec3 x) {
-                vec3 p = floor(x);
+            float vnoise(vec3 x) {
+                vec3 i = floor(x);
                 vec3 f = fract(x);
                 f = f * f * (3.0 - 2.0 * f);
-                float n = p.x + p.y * 57.0 + 113.0 * p.z;
-                return mix(mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
-                               mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y),
-                           mix(mix(hash(n + 113.0), hash(n + 114.0), f.x),
-                               mix(hash(n + 170.0), hash(n + 171.0), f.x), f.y), f.z);
+                return mix(
+                    mix(mix(hash13(i), hash13(i + vec3(1.0, 0.0, 0.0)), f.x),
+                        mix(hash13(i + vec3(0.0, 1.0, 0.0)), hash13(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+                    mix(mix(hash13(i + vec3(0.0, 0.0, 1.0)), hash13(i + vec3(1.0, 0.0, 1.0)), f.x),
+                        mix(hash13(i + vec3(0.0, 1.0, 1.0)), hash13(i + vec3(1.0, 1.0, 1.0)), f.x), f.y),
+                    f.z);
             }
 
             float fbm(vec3 p) {
-                float f = 0.0;
-                float w = 0.5;
+                float f = 0.0, w = 0.5;
                 for (int i = 0; i < 4; i++) {
-                    f += w * noise(p);
-                    p *= 2.0;
-                    w *= 0.4;
+                    f += w * vnoise(p);
+                    p = p * 2.03 + vec3(1.7, 9.2, 3.1);
+                    w *= 0.5;
                 }
-                return f;
+                return f / 0.9375;
             }
 
-            float getDiskDensity(vec3 p) {
-                float r = length(p.xz);
-                
-                if(r < 2.6 || r > 12.0) return 0.0;
-                
-                float h = abs(p.y);
-                float scaleH = exp(-h * 5.0);
-                if(scaleH < 0.01) return 0.0;
-                
-                // Velocidad diferencial baja (Agujero Supermasivo)
-                float angularSpeed = 0.08 * 6.0 / pow(max(r, 0.1), 1.5);
-                vec3 pRot = p;
-                pRot.xz *= rot(-u_time * angularSpeed);
-                
-                float rings = sin(r * 15.0 + fbm(pRot * 2.0) * 5.0);
-                rings = smoothstep(-0.2, 1.0, rings);
-                
-                float clouds = fbm(pRot * 3.0);
-                float density = rings * clouds * scaleH;
-                float fadeR = smoothstep(2.6, 3.2, r) * smoothstep(12.0, 8.0, r);
-                
-                return density * fadeR * 4.0;
+            // Color de cuerpo negro (aprox. Tanner Helland), salida en lineal
+            vec3 blackbody(float K) {
+                float t = clamp(K, 1000.0, 40000.0) / 100.0;
+                vec3 c;
+                c.r = t <= 66.0 ? 1.0 : clamp(1.2929362 * pow(max(t - 60.0, 0.001), -0.1332047), 0.0, 1.0);
+                c.g = t <= 66.0 ? clamp(0.3900816 * log(t) - 0.6318414, 0.0, 1.0)
+                                : clamp(1.1298909 * pow(max(t - 60.0, 0.001), -0.0755148), 0.0, 1.0);
+                c.b = t >= 66.0 ? 1.0 : (t <= 19.0 ? 0.0 : clamp(0.5432068 * log(t - 10.0) - 1.1962541, 0.0, 1.0));
+                return pow(c, vec3(2.2));
+            }
+
+            // Textura del disco: ruido anisotrópico (rayas largas en phi), seamless en phi
+            float diskSample(float rd, float phi, float tt) {
+                float ang = phi - tt * 2.6 * pow(rd, -1.5);   // rotación diferencial kepleriana
+                vec3 q = vec3(cos(ang) * 3.0, sin(ang) * 3.0, rd * 4.0);
+                return fbm(q);
+            }
+
+            // Dos fases con crossfade: el patrón nunca se enrolla indefinidamente
+            float diskTex(float rd, float phi) {
+                const float Tp = 45.0;
+                float p0 = fract(u_time / Tp);
+                float p1 = fract(u_time / Tp + 0.5);
+                float w0 = 1.0 - abs(2.0 * p0 - 1.0);
+                float n = w0 * diskSample(rd, phi, p0 * Tp) + (1.0 - w0) * diskSample(rd, phi, p1 * Tp);
+                return smoothstep(0.3, 0.7, n);
+            }
+
+            // Estrellas por celdas (tamaño/color/magnitud variables) + banda de Vía Láctea
+            vec3 background(vec3 d) {
+                vec3 c = vec3(0.0);
+                for (int l = 0; l < 2; l++) {
+                    float S = l == 0 ? 45.0 : 110.0;
+                    float thr = l == 0 ? 0.90 : 0.93;
+                    vec3 p = d * S;
+                    vec3 id = floor(p) + float(l) * 17.0;
+                    vec3 f = fract(p);
+                    if (hash13(id) > thr) {
+                        vec3 sp = vec3(hash13(id + 7.1), hash13(id + 13.7), hash13(id + 31.3)) * 0.4 + 0.3;
+                        float sz = (l == 0 ? 0.05 : 0.11) * (0.7 + 0.6 * hash13(id + 3.3));
+                        float dd = length(f - sp);
+                        float b = exp(-dd * dd / (sz * sz));
+                        float m = hash13(id + 5.5);
+                        float inten = 0.25 + 4.0 * pow(m, 6.0);
+                        vec3 sc = mix(vec3(1.0, 0.75, 0.55), vec3(0.65, 0.8, 1.0), hash13(id + 9.9));
+                        c += sc * b * inten;
+                    }
+                }
+                vec3 axis = normalize(vec3(0.35, 0.9, 0.25));
+                float bd = dot(d, axis);
+                float band = exp(-bd * bd * 18.0);
+                float cl = fbm(d * 4.0);
+                c += vec3(0.55, 0.6, 0.8) * band * (0.015 + 0.07 * cl * cl);
+                return c;
             }
 
             void main() {
                 vec2 uv = (vUv - 0.5) * 2.0;
                 float aspect = u_resolution.y > 0.0 ? u_resolution.x / u_resolution.y : 1.0;
                 uv.x *= aspect;
-                
-                float fovScale = tan(u_fov * 0.5 * 3.14159 / 180.0);
-                vec3 rayDir = normalize(uv.x * u_cameraRight * fovScale + uv.y * u_cameraUp * fovScale + u_cameraDir);
-                vec3 rayPos = u_cameraPos;
+
+                float fovScale = tan(u_fov * 0.5 * 3.14159265 / 180.0);
+                vec3 dir = normalize(uv.x * u_cameraRight * fovScale + uv.y * u_cameraUp * fovScale + u_cameraDir);
+                vec3 pos = u_cameraPos;
+
+                // Jitter por píxel (ruido de gradiente entrelazado): elimina el banding de los pasos
+                float jit = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+
+                // Geodésica nula de Schwarzschild: a = -1.5 rs h^2 x / r^5, con h^2 = |x × v|^2 constante
+                vec3 L = cross(pos, dir);
+                float h2 = dot(L, L);
 
                 vec3 col = vec3(0.0);
-                float transmittance = 1.0;
-                
-                // Paleta de colores cálidos y fijos
-                vec3 hot = vec3(1.0, 0.5, 0.1); // Naranja brillante
-                vec3 cold = vec3(0.4, 0.05, 0.0); // Rojo oscuro
-                
-                float dt = 0.06;
-                const int MAX_STEPS = 250;
-                
-                for(int i = 0; i < MAX_STEPS; i++) {
-                    float r2 = dot(rayPos, rayPos);
-                    float r = sqrt(r2);
-                    
-                    if(r < 2.2) {
-                        transmittance = 0.0;
-                        break;
-                    }
-                    
-                    // Lente Gravitacional
-                    vec3 force = -rayPos / (r2 * r);
-                    rayDir = normalize(rayDir + force * 2.5 * dt);
-                    
-                    if(abs(rayPos.y) < 2.0 && r < 14.0) {
-                        float d = getDiskDensity(rayPos);
-                        if(d > 0.0) {
-                            float temp = smoothstep(12.0, 2.6, r);
-                            vec3 localColor = mix(cold, hot, temp);
-                            
-                            // Efecto Doppler (Intensidad disminuida)
-                            vec3 velDir = normalize(vec3(-rayPos.z, 0.0, rayPos.x));
-                            float doppler = dot(rayDir, velDir); 
-                            float boost = max(0.0, 1.0 + doppler * 0.45); 
-                            localColor *= pow(boost, 2.0); 
+                float T = 1.0;
+                bool escaped = false;
 
-                            float emission = d * 1.8;
-                            col += localColor * emission * transmittance * dt;
-                            transmittance *= exp(-d * dt * 0.4);
+                for (int i = 0; i < MAX_STEPS; i++) {
+                    float r = length(pos);
+                    if (r < RS * 1.01) { T = 0.0; break; }
+                    if (r > 25.0 && dot(pos, dir) > 0.0) { escaped = true; break; }
+
+                    // Paso adaptativo: fino cerca del horizonte, grueso lejos. Se usa el MISMO dt para curvar y avanzar.
+                    float dt = clamp(0.04 * (r - RS) + 0.02, 0.02, 1.5) * (0.9 + 0.2 * jit);
+                    float r5 = r * r * r * r * r;
+                    dir = normalize(dir - 3.0 * h2 * pos / r5 * dt);
+                    vec3 nxt = pos + dir * dt;
+
+                    // Cruce del plano del disco (y = 0): disco delgado, permite imágenes secundarias
+                    if (pos.y * nxt.y < 0.0) {
+                        vec3 hit = mix(pos, nxt, pos.y / (pos.y - nxt.y));
+                        float rd = length(hit.xz);
+                        if (rd > R_ISCO && rd < R_OUT) {
+                            // Órbita circular: v = sqrt(M / (r - rs)) en el marco estático local
+                            float v = sqrt(1.0 / (rd - RS));
+                            vec3 vel = v * vec3(-hit.z, 0.0, hit.x) / rd;
+                            float gam = inversesqrt(1.0 - v * v);
+                            // dir va hacia atrás (cámara -> escena); el fotón viaja en -dir
+                            float gDop = 1.0 / (gam * (1.0 + dot(vel, dir)));
+                            float gGrav = sqrt(1.0 - RS / rd);
+                            float g = gGrav * mix(1.0, gDop, u_doppler);
+
+                            // Perfil de temperatura tipo Novikov-Thorne (normalizado a su máximo, 0.488)
+                            float x = sqrt(R_ISCO / rd);
+                            float prof = pow(x, 1.5) * pow(1.0 - x, 0.25) / 0.488;
+
+                            float tex = diskTex(rd, atan(hit.z, hit.x));
+                            float edge = smoothstep(R_ISCO, R_ISCO + 0.5, rd) * (1.0 - smoothstep(R_OUT - 6.0, R_OUT, rd));
+                            float alpha = clamp(0.25 + 0.9 * tex, 0.0, 1.0) * edge;
+
+                            // El color depende de la temperatura OBSERVADA (T_em * g); la intensidad ~ g^3.5
+                            vec3 emit = blackbody(5200.0 * prof * g) * pow(prof, 3.0) * pow(g, 3.5) * 2.5;
+                            col += T * alpha * emit;
+                            T *= 1.0 - alpha * 0.85;
                         }
                     }
-                    
-                    // SOLUCIÓN AL BUG DEL ZOOM
-                    float stepSize;
-                    if (r > 15.0) {
-                        stepSize = r - 14.5; 
-                    } else {
-                        stepSize = dt * min(1.5, max(0.5, r * 0.3));
-                    }
-                    
-                    rayPos += rayDir * stepSize;
-                    
-                    if(r > 70.0 || transmittance < 0.01) break;
-                }
-                
-                if(transmittance > 0.01) {
-                    float starNoise = noise(rayDir * 200.0);
-                    float stars = pow(max(0.0, starNoise - 0.75) * 4.0, 5.0);
-                    col += vec3(stars) * transmittance;
+                    pos = nxt;
+                    if (T < 0.01) break;
                 }
 
-                col = col * 1.5; 
-                col = (col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14);
+                if (escaped && T > 0.01) col += T * background(dir);
 
+                // Salida HDR lineal: tone mapping + sRGB + bloom se aplican en post-proceso
                 gl_FragColor = vec4(col, 1.0);
             }
         `;
 
-        let scene, camera, orthoCamera, renderer, material, controls;
+        let scene, camera, orthoCamera, renderer, composer, bloom, material, controls;
+        let quality = 1, interacting = false;
         const DOM = {
             container: document.getElementById('canvas-container'),
             canvas: document.getElementById('glcanvas')
         };
 
+        function applySize() {
+            const w = DOM.container.clientWidth || window.innerWidth;
+            const h = DOM.container.clientHeight || window.innerHeight;
+            // Resolución dinámica: baja mientras se interactúa, completa en reposo
+            const pr = Math.min(window.devicePixelRatio || 1, 1.5) * quality * (interacting ? 0.6 : 1);
+            renderer.setPixelRatio(pr);
+            renderer.setSize(w, h);
+            composer.setPixelRatio(pr);
+            composer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            material.uniforms.u_resolution.value.set(w, h);
+        }
+
         function init() {
             try {
-                let width = DOM.container.clientWidth || window.innerWidth;
-                let height = DOM.container.clientHeight || window.innerHeight;
+                const width = DOM.container.clientWidth || window.innerWidth;
+                const height = DOM.container.clientHeight || window.innerHeight;
 
                 scene = new THREE.Scene();
                 camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-                // Inicio en el zoom más lejano (r = ~49)
-                camera.position.set(0, 10, 48); 
-
+                camera.position.set(0, 10, 48);
                 orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 
-                renderer = new THREE.WebGLRenderer({ canvas: DOM.canvas, antialias: false });
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                renderer.setSize(width, height);
+                renderer = new THREE.WebGLRenderer({ canvas: DOM.canvas, antialias: false, powerPreference: 'high-performance' });
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.95; // exposición fija
+                renderer.debug.onShaderError = (gl, program, vs, fs) => {
+                    showError('Shader: ' + (gl.getShaderInfoLog(fs) || gl.getShaderInfoLog(vs) || gl.getProgramInfoLog(program)));
+                };
 
                 controls = new OrbitControls(camera, renderer.domElement);
                 controls.enableDamping = true;
                 controls.dampingFactor = 0.05;
                 controls.enablePan = false;
-                controls.minDistance = 6;
-                controls.maxDistance = 50; 
+                controls.minDistance = 8;
+                controls.maxDistance = 50;
 
-                const geometry = new THREE.PlaneGeometry(2, 2);
                 material = new THREE.ShaderMaterial({
                     vertexShader,
                     fragmentShader,
                     uniforms: {
                         u_resolution: { value: new THREE.Vector2(width, height) },
                         u_time: { value: 0 },
-                        u_cameraPos: { value: camera.position },
+                        u_cameraPos: { value: new THREE.Vector3() },
                         u_cameraDir: { value: new THREE.Vector3() },
                         u_cameraUp: { value: new THREE.Vector3() },
                         u_cameraRight: { value: new THREE.Vector3() },
-                        u_fov: { value: camera.fov }
+                        u_fov: { value: camera.fov },
+                        u_doppler: { value: 1 }
                     },
                     depthWrite: false,
                     depthTest: false
                 });
-                const mesh = new THREE.Mesh(geometry, material);
+                const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
+                mesh.frustumCulled = false;
                 scene.add(mesh);
 
-                window.addEventListener('resize', onWindowResize);
+                // Post-proceso HDR: render -> bloom -> tone mapping ACES + sRGB
+                composer = new EffectComposer(renderer);
+                composer.addPass(new RenderPass(scene, orthoCamera));
+                bloom = new UnrealBloomPass(new THREE.Vector2(width, height), 0.4, 0.6, 0.9); // bloom fijo (strength 0.4)
+                composer.addPass(bloom);
+                composer.addPass(new OutputPass());
+
+                applySize();
+                window.addEventListener('resize', applySize);
+
+                // Resolución reducida mientras se arrastra/zoom
+                let restoreTimer = null;
+                controls.addEventListener('start', () => {
+                    clearTimeout(restoreTimer);
+                    if (!interacting) { interacting = true; applySize(); }
+                });
+                controls.addEventListener('end', () => {
+                    clearTimeout(restoreTimer);
+                    restoreTimer = setTimeout(() => { interacting = false; applySize(); }, 300);
+                });
 
                 animate(0);
-                
+
                 setTimeout(() => {
                     const h = document.getElementById('hint-drag');
-                    if(h) h.style.display = 'none';
+                    if (h) h.style.display = 'none';
                 }, 5000);
 
-                // Fullscreen logic
+                // Pantalla completa
                 const btnFs = document.getElementById('btn-fullscreen');
-                if (btnFs) {
-                    btnFs.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                            const docEl = document.documentElement;
-                            const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
-                            if (requestFS) {
-                                requestFS.call(docEl).catch(err => console.log(err.message));
-                            } else {
-                                alert("Tu navegador no soporta pantalla completa automática.");
-                            }
+                btnFs.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                        const docEl = document.documentElement;
+                        const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+                        if (requestFS) {
+                            const p = requestFS.call(docEl);
+                            if (p && p.catch) p.catch(err => console.log(err.message));
                         } else {
-                            const exitFS = document.exitFullscreen || document.webkitExitFullscreen;
-                            if (exitFS) exitFS.call(document);
+                            alert("Tu navegador no soporta pantalla completa automática.");
                         }
-                    });
-                }
-                
-                const onFSChange = () => {
-                    if (btnFs) {
-                        const isFS = document.fullscreenElement || document.webkitFullscreenElement;
-                        btnFs.innerHTML = isFS ? "[x] Salir de Pantalla" : "[ ] Pantalla Completa";
+                    } else {
+                        const exitFS = document.exitFullscreen || document.webkitExitFullscreen;
+                        if (exitFS) exitFS.call(document);
                     }
+                });
+                const onFSChange = () => {
+                    const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+                    btnFs.innerHTML = isFS ? "[x] Salir de Pantalla" : "[ ] Pantalla Completa";
                 };
                 document.addEventListener('fullscreenchange', onFSChange);
                 document.addEventListener('webkitfullscreenchange', onFSChange);
 
-            } catch(e) {
-                window.onerror(e.message, 'internal', 0);
+            } catch (e) {
+                showError(e.message);
             }
-        }
-
-        function onWindowResize() {
-            const width = DOM.container.clientWidth || window.innerWidth;
-            const height = DOM.container.clientHeight || window.innerHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            material.uniforms.u_resolution.value.set(width, height);
         }
 
         const camDir = new THREE.Vector3();
@@ -336,16 +388,17 @@
             camUp.copy(camera.up).applyQuaternion(camera.quaternion);
             camRight.crossVectors(camDir, camUp).normalize();
 
-            material.uniforms.u_time.value = time * 0.001;
-            material.uniforms.u_cameraPos.value.copy(camera.position);
-            material.uniforms.u_cameraDir.value.copy(camDir);
-            material.uniforms.u_cameraUp.value.copy(camUp);
-            material.uniforms.u_cameraRight.value.copy(camRight);
+            const u = material.uniforms;
+            u.u_time.value = time * 0.001;
+            u.u_cameraPos.value.copy(camera.position);
+            u.u_cameraDir.value.copy(camDir);
+            u.u_cameraUp.value.copy(camUp);
+            u.u_cameraRight.value.copy(camRight);
 
-            renderer.render(scene, orthoCamera);
+            composer.render();
         }
 
-        if(document.readyState === 'loading') {
+        if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
             init();

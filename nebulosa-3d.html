@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Comparación 1:1: Nube de Oort vs. Nebulosa de la Hélice | Blog Leonardo N. Hernandez</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="agujero-negro-3d.css">
+
+    <style>
+        .ui-panel {
+            position: absolute;
+            bottom: max(2rem, env(safe-area-inset-bottom, 2rem));
+            left: max(2rem, env(safe-area-inset-left, 2rem));
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            color: #fff;
+            font-family: var(--font-sans, 'Inter', sans-serif);
+            max-width: 320px;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+        }
+        .ui-panel h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #00e5ff;
+            font-weight: 600;
+        }
+        .ui-panel p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+        .view-btn {
+            background: transparent;
+            border: 1px solid rgba(0, 229, 255, 0.5);
+            color: #00e5ff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-mono, 'Space Mono', monospace);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+        .view-btn:hover, .view-btn.active {
+            background: rgba(0, 229, 255, 0.2);
+            border-color: #00e5ff;
+        }
+    </style>
+
+    <!-- Material Web Components -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/",
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import '@material/web/all.js';
+    </script>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background-color: #000;">
+
+    <div id="error-overlay" style="display:none; position:absolute; z-index:99999; background:#900; color:#fff; padding:2rem; top:0; left:0; width:100%; height:100%; overflow:auto; font-family:monospace;">
+        <h2>Error Crítico</h2>
+        <div id="error-log"></div>
+    </div>
+
+    <div id="canvas-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden;">
+        
+        <div style="position: absolute; top: max(2rem, env(safe-area-inset-top, 2rem)); left: max(2rem, env(safe-area-inset-left, 2rem)); z-index: 100; pointer-events: none;">
+            <a href="museo.html" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: opacity 0.2s;">&larr; Regresar al Museo</a>
+            <h1 style="margin: 0; color: #f4f4f4; font-family: var(--font-sans, 'Inter', sans-serif); font-size: 2rem; font-weight: 600; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,1.0);">Escala 1:1</h1>
+        </div>
+
+        <div style="position: absolute; bottom: max(5rem, env(safe-area-inset-bottom, 5rem)); left: 0; right: 0; z-index: 100; pointer-events: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #00e5ff; text-shadow: 0 2px 6px rgba(0,0,0,1);">
+            <span style="position: absolute; left: 28%; transform: translateX(-50%); text-align: center; white-space: nowrap;">Nube de Oort<br><span style="color:#aaa;">Hoy</span></span>
+            <span style="position: absolute; left: 72%; transform: translateX(-50%); text-align: center; white-space: nowrap;">Nebulosa de la Hélice<br><span style="color:#aaa;">Futuro</span></span>
+        </div>
+
+        <div style="position: absolute; bottom: max(2rem, env(safe-area-inset-bottom, 2rem)); right: max(2rem, env(safe-area-inset-right, 2rem)); z-index: 100; pointer-events: none;">
+            <a href="#" id="btn-fullscreen" style="pointer-events: auto; color: #00e5ff; text-decoration: none; font-family: var(--font-mono, 'Space Mono', monospace); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block; padding: 0.5rem 1rem; border: 1px solid rgba(0, 229, 255, 0.4); border-radius: 4px; background: rgba(0,0,0,0.4); text-shadow: 0 2px 4px rgba(0,0,0,0.8); transition: all 0.2s;">
+                [ ] Pantalla Completa
+            </a>
+        </div>
+
+        <canvas id="glcanvas"></canvas>
+        
+        <div class="bh3d-overlay-hint" id="hint-drag">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            Arrastra para rotar
+        </div>
+    </div>
+
+    <script type="module">
+        window.onerror = function(msg, url, line) {
+            const errDiv = document.getElementById('error-overlay');
+            errDiv.style.display = 'block';
+            document.getElementById('error-log').innerHTML += "<p>" + msg + " (Línea: " + line + ")</p>";
+        };
+
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const vertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = vec4(position, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform vec3 u_cameraPos;
+            uniform vec3 u_cameraDir;
+            uniform vec3 u_cameraUp;
+            uniform vec3 u_cameraRight;
+            uniform float u_fov;
+
+            varying vec2 vUv;
+
+            const float TAU = 6.2831853;
+
+            mat2 rot(float a) {
+                float s = sin(a), c = cos(a);
+                return mat2(c, -s, s, c);
+            }
+
+            // Hashes sin-free (sin() produce artefactos y patrones a gran escala)
+            float hash21(vec2 p) {
+                vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+                p3 += dot(p3, p3.yzx + 33.33);
+                return fract((p3.x + p3.y) * p3.z);
+            }
+            float hash31(vec3 p) {
+                p = fract(p * 0.1031);
+                p += dot(p, p.zyx + 31.32);
+                return fract((p.x + p.y) * p.z);
+            }
+            vec3 hash33(vec3 p) {
+                p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+                p += dot(p, p.yxz + 33.33);
+                return fract((p.xxy + p.yxx) * p.zyx);
+            }
+
+            float noise(vec3 x) {
+                vec3 i = floor(x);
+                vec3 f = fract(x);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(mix(hash31(i), hash31(i + vec3(1.0, 0.0, 0.0)), f.x),
+                        mix(hash31(i + vec3(0.0, 1.0, 0.0)), hash31(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),
+                    mix(mix(hash31(i + vec3(0.0, 0.0, 1.0)), hash31(i + vec3(1.0, 0.0, 1.0)), f.x),
+                        mix(hash31(i + vec3(0.0, 1.0, 1.0)), hash31(i + vec3(1.0, 1.0, 1.0)), f.x), f.y),
+                    f.z);
+            }
+
+            float fbm(vec3 p) {
+                float f = 0.0;
+                float w = 0.5;
+                for (int i = 0; i < 3; i++) {
+                    f += w * noise(p);
+                    p = p * 2.03 + vec3(1.7, 9.2, 3.1); // desfase: evita alineación entre octavas
+                    w *= 0.5;
+                }
+                return f;
+            }
+
+            // ---------- Nube de Oort: cáscara de material helado y grumoso ----------
+            float getOortDensity(vec3 p) {
+                float r = length(p);
+                float shell = smoothstep(1.8, 0.0, abs(r - 7.0));
+                if (shell <= 0.0) return 0.0;
+                float clump = noise(p * 1.1 + u_time * 0.02) * noise(p * 2.7 + 5.0);
+                clump = smoothstep(0.12, 0.45, clump);
+                return shell * (0.015 + 0.3 * clump);
+            }
+
+            // ---------- Nebulosa de la Hélice ----------
+            vec3 toHelix(vec3 p) {
+                p.yz *= rot(0.85); // Inclinación hacia nosotros
+                p.xy *= rot(0.2);
+                return p;
+            }
+
+            // Devuelve (gas, nudos, nudos_en_cola). Los nudos cometarios tienen la
+            // cabeza (brillante, ionizada) hacia la estrella y la cola apuntando hacia afuera.
+            vec3 helixDensity(vec3 q) {
+                float rxy = length(q.xy);
+
+                float centerShape = smoothstep(2.0, -4.0, length(vec2(rxy * 0.5, q.z)) - 4.0) * 0.22;
+                float ringShape = smoothstep(1.5, -1.0, length(vec2(rxy - 7.0, q.z * 0.9)) - 2.0);
+                float haloShape = smoothstep(4.0, -2.0, length(vec2(rxy - 9.0, q.z * 0.7)) - 4.5) * 0.4;
+                float shape = centerShape + ringShape + haloShape;
+                if (shape < 0.01) return vec3(0.0);
+
+                // Gas con deformación de dominio (domain warping) -> filamentos
+                vec3 w = q * 0.38 + vec3(0.0, 0.0, u_time * 0.03);
+                float wv = noise(w + 3.1) - 0.5;
+                float n = fbm(w + vec3(wv, wv * 0.7, -wv) * 1.8);
+                float fil = pow(1.0 - abs(2.0 * noise(q * 0.9 + wv * 3.0) - 1.0), 4.0);
+                float gas = shape * (0.25 + 0.75 * n) * (0.65 + 0.9 * fil);
+
+                float knots = 0.0;
+                float knotsTail = 0.0;
+                if (rxy > 4.5 && rxy < 11.0 && abs(q.z) < 3.5) {
+                    float ang = atan(q.y, q.x);
+                    for (int k = 0; k < 2; k++) {
+                        float N = (k == 0) ? 100.0 : 64.0;
+                        float seed = float(k) * 37.0;
+                        float a = ang / TAU * N;
+                        float id = floor(a);
+                        float h1 = hash21(vec2(id, 11.7 + seed));
+                        float h2 = hash21(vec2(id, 23.1 + seed));
+                        float h3 = hash21(vec2(id, 5.3 + seed));
+
+                        float arc = (fract(a) - (0.35 + 0.3 * h1)) * TAU * rxy / N;
+                        float rh = 5.2 + 3.0 * h2;       // radio de la cabeza
+                        float dr = rxy - rh;
+                        float tail = dr > 0.0 ? exp(-dr * 0.55) : exp(dr * 5.0);
+                        float wd = 0.05 + 0.01 * max(dr, 0.0);
+                        float dz = q.z - (h3 - 0.5) * 3.0;
+
+                        float kv = exp(-(arc * arc) / (wd * wd)) * exp(-dz * dz * 0.8) * tail;
+                        knots += kv;
+                        knotsTail += kv * smoothstep(0.0, 2.0, dr);
+                    }
+                    float m = smoothstep(0.0, 0.3, shape);
+                    knots *= m;
+                    knotsTail *= m;
+                }
+                return vec3(gas, knots, knotsTail);
+            }
+
+            // ---------- Fondo: estrellas con color y vía láctea tenue ----------
+            vec3 starLayer(vec3 d, float scale, float size) {
+                vec3 p = d * scale;
+                vec3 cell = floor(p);
+                vec3 h = hash33(cell);
+                vec3 center = vec3(0.5) + (hash33(cell + 7.0) - 0.5) * 0.6;
+                float s = smoothstep(size, 0.0, length(fract(p) - center));
+                s *= s;
+                float mag = 0.25 + 0.75 * h.y * h.y * h.y;
+                vec3 tint = mix(vec3(1.0, 0.7, 0.5), vec3(0.7, 0.85, 1.0), h.z);
+                return tint * s * mag * 2.2;
+            }
+
+            const float OFFSET = 13.5;  // separación del centro de cada objeto al origen
+            const float BOUND = 15.5;   // radio de la esfera envolvente de cada objeto
+
+            // Devuelve (entrada, salida) del rayo en la esfera; salida < 0 si no hay impacto
+            vec2 sphereHit(vec3 ro, vec3 rd, vec3 c, float R) {
+                vec3 o = ro - c;
+                float b = dot(o, rd);
+                float h = b * b - (dot(o, o) - R * R);
+                if (h < 0.0) return vec2(1.0, -1.0);
+                float s = sqrt(h);
+                return vec2(-b - s, -b + s);
+            }
+
+            // Brillo analítico de una estrella central (núcleo + halo)
+            vec3 starGlow(vec3 ro, vec3 rd, vec3 c, vec3 color, float Ts) {
+                vec3 o = ro - c;
+                float b = dot(o, rd);
+                if (b > 0.0) return vec3(0.0);
+                float d2 = max(dot(o, o) - b * b, 0.0);
+                float core = exp(-d2 * 30.0) * 4.0 + 0.04 / (d2 + 0.15);
+                return color * core * Ts;
+            }
+
+            void main() {
+                vec2 uv = (vUv - 0.5) * 2.0;
+                float aspect = u_resolution.y > 0.0 ? u_resolution.x / u_resolution.y : 1.0;
+                uv.x *= aspect;
+
+                float fovScale = tan(u_fov * 0.5 * 3.14159 / 180.0);
+                vec3 rd = normalize(uv.x * u_cameraRight * fovScale + uv.y * u_cameraUp * fovScale + u_cameraDir);
+                vec3 ro = u_cameraPos;
+
+                // Izquierda: Sistema Solar + Nube de Oort. Derecha: Nebulosa de la Hélice.
+                vec3 cO = vec3(-OFFSET, 0.0, 0.0);
+                vec3 cH = vec3(OFFSET, 0.0, 0.0);
+
+                vec3 cTeal = vec3(0.12, 0.55, 0.80);
+                vec3 cYellow = vec3(1.0, 0.68, 0.22);
+                vec3 cRed = vec3(0.80, 0.15, 0.05);
+                vec3 colorOort = vec3(0.5, 0.8, 1.0);
+
+                vec3 col = vec3(0.0);
+                float T = 1.0;
+
+                // Intervalo de marcha = unión de las dos esferas envolventes
+                vec2 hO = sphereHit(ro, rd, cO, BOUND);
+                vec2 hH = sphereHit(ro, rd, cH, BOUND);
+                float t0 = 1e9;
+                float t1 = -1e9;
+                if (hO.y > 0.0) { t0 = min(t0, max(hO.x, 0.0)); t1 = max(t1, hO.y); }
+                if (hH.y > 0.0) { t0 = min(t0, max(hH.x, 0.0)); t1 = max(t1, hH.y); }
+
+                float tcO = -dot(ro - cO, rd);
+                float tcH = -dot(ro - cH, rd);
+                float TstarO = 1.0;
+                float TstarH = 1.0;
+                bool doneO = false;
+                bool doneH = false;
+                float ign = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+
+                if (t1 > t0) {
+                    const int STEPS = 96;
+                    float dt = (t1 - t0) / float(STEPS);
+                    float t = t0 + dt * ign;
+
+                    for (int i = 0; i < STEPS; i++) {
+                        vec3 p = ro + rd * t;
+                        if (!doneO && t > tcO) { TstarO = T; doneO = true; }
+                        if (!doneH && t > tcH) { TstarH = T; doneH = true; }
+
+                        // Nube de Oort (izquierda)
+                        vec3 pO = p - cO;
+                        if (dot(pO, pO) < 100.0) {
+                            float od = getOortDensity(pO);
+                            if (od > 0.0) {
+                                col += colorOort * od * T * dt;
+                                T *= exp(-od * dt * 0.1);
+                            }
+                        }
+
+                        // Nebulosa de la Hélice (derecha)
+                        vec3 pH = p - cH;
+                        if (dot(pH, pH) < BOUND * BOUND) {
+                            vec3 q = toHelix(pH);
+                            vec3 hd = helixDensity(q);
+                            if (hd.x > 0.0 || hd.y > 0.0) {
+                                float rxy = length(q.xy);
+
+                                vec3 hCol = mix(cTeal, cYellow, smoothstep(4.5, 7.0, rxy));
+                                hCol = mix(hCol, cRed, smoothstep(7.5, 11.0, rxy));
+
+                                float tn = hd.z / max(hd.y, 0.0001);
+                                vec3 kCol = mix(vec3(0.6, 1.0, 1.0), vec3(1.0, 0.45, 0.2), tn);
+
+                                vec3 emitted = hCol * hd.x * 1.25 + kCol * hd.y * 1.6;
+                                float dens = hd.x + hd.y * 1.2;
+
+                                col += emitted * 0.8 * T * dt;
+                                T *= exp(-dens * dt * 0.9);
+                            }
+                        }
+
+                        t += dt;
+                        if (T < 0.02) break;
+                    }
+                    if (!doneO) TstarO = T;
+                    if (!doneH) TstarH = T;
+                }
+
+                // Estrellas centrales: Sol (izquierda) y enana blanca (derecha)
+                col += starGlow(ro, rd, cO, vec3(1.0, 0.85, 0.5), TstarO);
+                col += starGlow(ro, rd, cH, vec3(0.75, 0.9, 1.0) * 0.9, TstarH);
+
+                // Fondo
+                if (T > 0.02) {
+                    vec3 bg = starLayer(rd, 160.0, 0.12) + starLayer(rd * 1.7 + 3.0, 60.0, 0.13) * 1.4;
+                    float band = dot(rd, normalize(vec3(0.3, 0.9, 0.2))) * 3.5;
+                    bg += vec3(0.35, 0.40, 0.60) * exp(-band * band) * (0.25 + fbm(rd * 5.0)) * 0.05;
+                    col += bg * T;
+                }
+
+                col = vec3(1.0) - exp(-col * 1.4);
+                col = pow(col, vec3(0.9));
+                vec2 vq = vUv - 0.5;
+                col *= 1.0 - dot(vq, vq) * 0.8;
+
+                gl_FragColor = vec4(col, 1.0);
+            }
+        `;
+
+        let scene, camera, orthoCamera, renderer, material, controls;
+        const DOM = {
+            container: document.getElementById('canvas-container'),
+            canvas: document.getElementById('glcanvas')
+        };
+        
+        function init() {
+            try {
+                let width = DOM.container.clientWidth || window.innerWidth;
+                let height = DOM.container.clientHeight || window.innerHeight;
+
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 300);
+                // Distancia para encuadrar ambos objetos (semiancho ~29 unidades)
+                const fitDist = Math.max(44, 29 / (Math.tan(22.5 * Math.PI / 180) * (width / height)));
+                camera.position.set(0, 0, fitDist); 
+
+                orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
+
+                renderer = new THREE.WebGLRenderer({ canvas: DOM.canvas, antialias: false });
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // raymarching: limitar resolución
+                renderer.setSize(width, height);
+
+                controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.enablePan = false;
+                controls.minDistance = 2;
+                controls.maxDistance = 200; 
+                // Giro limitado para que siempre se vean lado a lado
+                controls.minAzimuthAngle = -Math.PI / 4;
+                controls.maxAzimuthAngle = Math.PI / 4;
+                controls.minPolarAngle = Math.PI * 0.25;
+                controls.maxPolarAngle = Math.PI * 0.75;
+
+                const geometry = new THREE.PlaneGeometry(2, 2);
+                material = new THREE.ShaderMaterial({
+                    vertexShader,
+                    fragmentShader,
+                    uniforms: {
+                        u_resolution: { value: new THREE.Vector2(width, height) },
+                        u_time: { value: 0 },
+                        u_cameraPos: { value: camera.position },
+                        u_cameraDir: { value: new THREE.Vector3() },
+                        u_cameraUp: { value: new THREE.Vector3() },
+                        u_cameraRight: { value: new THREE.Vector3() },
+                        u_fov: { value: camera.fov }
+                    },
+                    depthWrite: false,
+                    depthTest: false
+                });
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+
+                window.addEventListener('resize', onWindowResize);
+
+                animate(0);
+                
+                setTimeout(() => {
+                    const h = document.getElementById('hint-drag');
+                    if(h) h.style.display = 'none';
+                }, 5000);
+
+                // Fullscreen logic
+                const btnFs = document.getElementById('btn-fullscreen');
+                if (btnFs) {
+                    btnFs.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                            const docEl = document.documentElement;
+                            const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+                            if (requestFS) {
+                                requestFS.call(docEl).catch(err => console.log(err.message));
+                            } else {
+                                alert("Tu navegador no soporta pantalla completa automática.");
+                            }
+                        } else {
+                            const exitFS = document.exitFullscreen || document.webkitExitFullscreen;
+                            if (exitFS) exitFS.call(document);
+                        }
+                    });
+                }
+                
+                const onFSChange = () => {
+                    if (btnFs) {
+                        const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+                        btnFs.innerHTML = isFS ? "[x] Salir de Pantalla" : "[ ] Pantalla Completa";
+                    }
+                };
+                document.addEventListener('fullscreenchange', onFSChange);
+                document.addEventListener('webkitfullscreenchange', onFSChange);
+
+            } catch(e) {
+                window.onerror(e.message, 'internal', 0);
+            }
+        }
+
+        function onWindowResize() {
+            const width = DOM.container.clientWidth || window.innerWidth;
+            const height = DOM.container.clientHeight || window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            material.uniforms.u_resolution.value.set(width, height);
+        }
+
+        const camDir = new THREE.Vector3();
+        const camUp = new THREE.Vector3();
+        const camRight = new THREE.Vector3();
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            camera.getWorldDirection(camDir);
+            camUp.copy(camera.up).applyQuaternion(camera.quaternion);
+            camRight.crossVectors(camDir, camUp).normalize();
+
+            material.uniforms.u_time.value = time * 0.001;
+            material.uniforms.u_cameraPos.value.copy(camera.position);
+            material.uniforms.u_cameraDir.value.copy(camDir);
+            material.uniforms.u_cameraUp.value.copy(camUp);
+            material.uniforms.u_cameraRight.value.copy(camRight);
+
+            renderer.render(scene, orthoCamera);
+        }
+
+        if(document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
